@@ -20,19 +20,30 @@ export default class UploadUserBannerController {
    * @responseBody 403 - {"message": "You can only upload banner for your own profile"} - Forbidden access
    * @responseBody 500 - {"message": "An error occurred while uploading the banner", "error": "string"} - Internal server error
    */
-  async handle({ request, response, auth, params }: HttpContext) {
+  async handle({ request, response, auth, params, logger }: HttpContext) {
     try {
       // Ensure user is authenticated
       if (!auth.user) {
+        logger.warn({ event: 'user.banner.upload.unauthenticated' })
         return response.unauthorized({
           message: 'Authentication required',
         })
       }
 
-      const userId = params.id ? parseInt(params.id) : auth.user.id
+      const userId = params.id ? Number.parseInt(params.id) : auth.user.id
+      logger.info({
+        event: 'user.banner.upload.attempt',
+        actorUserId: auth.user.id,
+        targetUserId: userId,
+      })
 
       // Users can only upload banner for their own profile unless they're admin
       if (userId !== auth.user.id) {
+        logger.warn({
+          event: 'user.banner.upload.forbidden',
+          actorUserId: auth.user.id,
+          targetUserId: userId,
+        })
         return response.forbidden({
           message: 'You can only upload banner for your own profile',
         })
@@ -40,6 +51,7 @@ export default class UploadUserBannerController {
 
       const banner = request.file('banner')
       if (!banner) {
+        logger.warn({ event: 'user.banner.upload.missing_file', targetUserId: userId })
         return response.badRequest({
           message: 'Banner image is required',
           error: 'MISSING_BANNER_FILE',
@@ -48,6 +60,7 @@ export default class UploadUserBannerController {
 
       const user = await this.usersService.uploadBanner(userId, banner)
 
+      logger.info({ event: 'user.banner.upload.success', userId: user.id })
       return response.ok({
         message: 'Banner uploaded successfully',
         data: {
@@ -57,9 +70,10 @@ export default class UploadUserBannerController {
           bannerUrl: user.bannerUrl,
         },
       })
-    } catch (error) {
+    } catch (error: any) {
       // Handle validation errors
-      if (error.messages) {
+      if (error?.messages) {
+        logger.warn({ event: 'user.banner.upload.validation_failed', issues: error.messages })
         return response.badRequest({
           message: 'Validation failed',
           errors: error.messages,
@@ -67,9 +81,9 @@ export default class UploadUserBannerController {
       }
 
       // Handle other errors
+      logger.error({ event: 'user.banner.upload.error', err: error?.message })
       return response.internalServerError({
         message: 'An error occurred while uploading the banner',
-        error: error.message,
       })
     }
   }

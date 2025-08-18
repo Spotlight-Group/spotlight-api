@@ -13,11 +13,18 @@ const loggerConfig = defineConfig({
     app: {
       enabled: true,
       name: env.get('APP_NAME'),
-      level: env.get('LOG_LEVEL'),
+      level: env.get('LOG_LEVEL', 'info'),
+
+      // ⛔ jamais loggés (Pino redaction)
+      redact: {
+        paths: ['password', 'authorization', 'headers.authorization', 'token', 'token.value'],
+        censor: '[REDACTED]',
+      },
+
       transport: {
         targets: targets()
-          .pushIf(!app.inProduction, targets.pretty())
-          .pushIf(app.inProduction, targets.file({ destination: 1 }))
+          .pushIf(!app.inProduction, targets.pretty()) // joli en dev
+          .pushIf(app.inProduction, targets.file({ destination: 1 })) // JSON en prod
           .toArray(),
       },
     },

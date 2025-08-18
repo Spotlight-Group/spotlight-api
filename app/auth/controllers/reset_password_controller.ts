@@ -17,11 +17,13 @@ export default class ResetPasswordController {
    * @responseBody 400 - {"message": "Invalid or expired token"} - Token validation failed
    * @responseBody 500 - {"message": "An error occurred", "error": "string"} - Internal server error
    */
-  async show({ params, response }: HttpContext) {
+  async show({ params, response, logger }: HttpContext) {
     try {
+      logger.info({ event: 'password.reset.show.attempt' })
       const { token } = params
 
       if (!token) {
+        logger.warn({ event: 'password.reset.show.missing_token' })
         return response.badRequest({
           message: 'Token is required',
         })
@@ -32,14 +34,15 @@ export default class ResetPasswordController {
       // 1. Validate the token
       // 2. Return a form view
       // 3. Redirect to a frontend application with the token
+      logger.info({ event: 'password.reset.show.success' })
       return response.ok({
         message: 'Reset password form',
         token: decodeURIComponent(token),
       })
-    } catch (error) {
+    } catch (error: any) {
+      logger.error({ event: 'password.reset.show.error', err: error?.message })
       return response.internalServerError({
         message: 'An error occurred',
-        error: error.message,
       })
     }
   }
@@ -55,12 +58,19 @@ export default class ResetPasswordController {
    * @responseBody 404 - {"message": "User with this email address not found"} - User not found
    * @responseBody 500 - {"message": "An error occurred while resetting the password", "error": "string"} - Internal server error
    */
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, logger }: HttpContext) {
     try {
       const payload = await request.validateUsing(resetPasswordValidator)
+      const emailMasked = payload.email
+        ? String(payload.email)
+            .toLowerCase()
+            .replace(/(.{2}).+(@.+)/, '$1***$2')
+        : undefined
+      logger.info({ event: 'password.reset.attempt', emailMasked })
 
       const user = await this.usersService.resetPassword(payload)
 
+      logger.info({ event: 'password.reset.success', userId: user.id })
       return response.ok({
         message: 'Password reset successfully',
         data: {
@@ -68,9 +78,10 @@ export default class ResetPasswordController {
           email: user.email,
         },
       })
-    } catch (error) {
+    } catch (error: any) {
       // Handle validation errors
-      if (error.messages) {
+      if (error?.messages) {
+        logger.warn({ event: 'password.reset.validation_failed', issues: error.messages })
         return response.badRequest({
           message: 'Validation failed',
           errors: error.messages,
@@ -78,16 +89,17 @@ export default class ResetPasswordController {
       }
 
       // Handle user not found error
-      if (error.message === 'User not found') {
+      if (error?.message === 'User not found') {
+        logger.warn({ event: 'password.reset.user_not_found' })
         return response.notFound({
           message: 'User with this email address not found',
         })
       }
 
       // Handle other errors
+      logger.error({ event: 'password.reset.error', err: error?.message })
       return response.internalServerError({
         message: 'An error occurred while resetting the password',
-        error: error.message,
       })
     }
   }

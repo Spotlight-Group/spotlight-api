@@ -10,7 +10,7 @@ test.group('Auth - Users Service', () => {
       full_name: 'John Doe',
       email: 'john.doe.service@example.com',
       password: 'password123',
-      bannerUrl: 'https://example.com/banner.jpg'
+      bannerUrl: 'https://example.com/banner.jpg',
     }
 
     const user = await usersService.register(userData)
@@ -28,7 +28,7 @@ test.group('Auth - Users Service', () => {
     const userData = {
       full_name: 'Jane Doe',
       email: 'jane.doe.service@example.com',
-      password: 'password123'
+      password: 'password123',
     }
 
     const user = await usersService.register(userData)
@@ -45,7 +45,7 @@ test.group('Auth - Users Service', () => {
     const userData = {
       full_name: 'Duplicate User',
       email: 'duplicate.service@example.com',
-      password: 'password123'
+      password: 'password123',
     }
 
     // Register first user
@@ -55,7 +55,7 @@ test.group('Auth - Users Service', () => {
     try {
       await usersService.register({
         ...userData,
-        full_name: 'Another User'
+        full_name: 'Another User',
       })
       assert.fail('Should have thrown an error for duplicate email')
     } catch (error) {
@@ -69,7 +69,7 @@ test.group('Auth - Users Service', () => {
     const userData = {
       full_name: 'Auth User',
       email: 'auth.user.service@example.com',
-      password: 'password123'
+      password: 'password123',
     }
 
     // Register user first
@@ -101,7 +101,7 @@ test.group('Auth - Users Service', () => {
     const userData = {
       full_name: 'Password Test User',
       email: 'password.test.service@example.com',
-      password: 'password123'
+      password: 'password123',
     }
 
     // Register user first
@@ -122,7 +122,7 @@ test.group('Auth - Users Service', () => {
     const userData = {
       full_name: 'Find User',
       email: 'find.user.service@example.com',
-      password: 'password123'
+      password: 'password123',
     }
 
     const registeredUser = await usersService.register(userData)
@@ -147,7 +147,7 @@ test.group('Auth - Users Service', () => {
     const userData = {
       full_name: 'Email Find User',
       email: 'email.find.service@example.com',
-      password: 'password123'
+      password: 'password123',
     }
 
     await usersService.register(userData)
@@ -172,14 +172,14 @@ test.group('Auth - Users Service', () => {
     const userData = {
       full_name: 'Update User',
       email: 'update.user.service@example.com',
-      password: 'password123'
+      password: 'password123',
     }
 
     const user = await usersService.register(userData)
 
     const updateData = {
       full_name: 'Updated Name',
-      bannerUrl: 'https://example.com/new-banner.jpg'
+      bannerUrl: 'https://example.com/new-banner.jpg',
     }
 
     const updatedUser = await usersService.update(user.id, updateData)
@@ -194,7 +194,7 @@ test.group('Auth - Users Service', () => {
     const userData = {
       full_name: 'Delete User',
       email: 'delete.user.service@example.com',
-      password: 'password123'
+      password: 'password123',
     }
 
     const user = await usersService.register(userData)
@@ -212,7 +212,7 @@ test.group('Auth - Users Service', () => {
     const userData = {
       full_name: 'Hash Test User',
       email: 'hash.test.service@example.com',
-      password: 'password123'
+      password: 'password123',
     }
 
     await usersService.register(userData)
@@ -228,13 +228,15 @@ test.group('Auth - Users Service', () => {
   test('should handle concurrent user registrations', async ({ assert }) => {
     const usersService = new UsersService()
 
-    const userPromises = Array(3).fill(null).map((_, index) =>
-      usersService.register({
-        full_name: `Concurrent User ${index}`,
-        email: `concurrent${index}.service@example.com`,
-        password: 'password123'
-      })
-    )
+    const userPromises = Array(3)
+      .fill(null)
+      .map((_, index) =>
+        usersService.register({
+          full_name: `Concurrent User ${index}`,
+          email: `concurrent${index}.service@example.com`,
+          password: 'password123',
+        })
+      )
 
     const users = await Promise.all(userPromises)
 

@@ -16,10 +16,13 @@ export default class GetUserController {
    * @responseBody 404 - {"message": "User not found"} - User not found
    * @responseBody 500 - {"message": "An error occurred while retrieving the user", "error": "string"} - Internal server error
    */
-  async handle({ response, auth }: HttpContext) {
+  async handle({ response, auth, logger }: HttpContext) {
     try {
+      logger.info({ event: 'user.get.attempt', userId: auth.user?.id })
+
       // Ensure user is authenticated
       if (!auth.user) {
+        logger.warn({ event: 'user.get.unauthenticated' })
         return response.unauthorized({
           message: 'Authentication required',
         })
@@ -27,6 +30,7 @@ export default class GetUserController {
 
       const user = await this.usersService.getById(auth.user.id)
 
+      logger.info({ event: 'user.get.success', userId: user.id })
       return response.ok({
         message: 'User retrieved successfully',
         data: {
@@ -39,18 +43,19 @@ export default class GetUserController {
           updatedAt: user.updatedAt,
         },
       })
-    } catch (error) {
+    } catch (error: any) {
       // Handle user not found
-      if (error.message === 'User not found') {
+      if (error?.message === 'User not found') {
+        logger.warn({ event: 'user.get.not_found' })
         return response.notFound({
           message: 'User not found',
         })
       }
 
       // Handle other errors
+      logger.error({ event: 'user.get.error', err: error?.message })
       return response.internalServerError({
         message: 'An error occurred while retrieving the user',
-        error: error.message,
       })
     }
   }

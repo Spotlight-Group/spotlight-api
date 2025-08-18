@@ -18,7 +18,7 @@ export default class AdminMiddleware {
     // Check if user has admin role
     if (user.role !== UserRoles.ADMIN) {
       return ctx.response.forbidden({
-        message: 'Admin access required. This action is restricted to administrators only.'
+        message: 'Admin access required. This action is restricted to administrators only.',
       })
     }
 

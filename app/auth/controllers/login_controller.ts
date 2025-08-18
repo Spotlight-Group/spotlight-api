@@ -18,25 +18,43 @@ export default class LoginController {
    * @responseBody 400 - {"message": "You are already logged in"} - Already logged in
    * @responseBody 401 - {"message": "Invalid credentials"} - Invalid credentials
    */
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, response, auth, logger }: HttpContext) {
+    const rawEmail = String(request.input('email') || '').toLowerCase()
+    const emailMasked = rawEmail ? rawEmail.replace(/(.{2}).+(@.+)/, '$1***$2') : undefined
+    logger.info({ event: 'user.login.attempt', emailMasked })
+
     if (auth.user) {
+      logger.warn({ event: 'user.login.already_logged_in', userId: auth.user.id })
       return response.status(400).json({
         message: 'You are already logged in',
       })
     }
 
-    const { email, password } = await request.validateUsing(loginValidator)
+    try {
+      const { email, password } = await request.validateUsing(loginValidator)
 
-    const user = await this.usersService.attempt(email, password)
-    const token = await User.accessTokens.create(user)
+      const user = await this.usersService.attempt(email, password)
+      const token = await User.accessTokens.create(user)
 
-    return response.ok({
-      user: {
-        id: user.id,
-        full_name: user.full_name,
-        email: user.email,
-      },
-      token,
-    })
+      logger.info({ event: 'user.login.success', userId: user.id })
+      return response.ok({
+        user: {
+          id: user.id,
+          full_name: user.full_name,
+          email: user.email,
+        },
+        token, // do not log token value
+      })
+    } catch (error: any) {
+      if (error?.messages) {
+        logger.warn({ event: 'user.login.validation_failed', issues: error.messages })
+        return response.unprocessableEntity({
+          message: 'Validation failed',
+          errors: error.messages,
+        })
+      }
+      logger.warn({ event: 'user.login.invalid_credentials_or_error', err: error?.message })
+      return response.unauthorized({ message: 'Invalid credentials' })
+    }
   }
 }

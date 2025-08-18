@@ -6,28 +6,32 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').notNullable()
+      table.integer('user_id').unsigned().notNullable()
+      table.integer('event_id').unsigned().notNullable()
+      table.boolean('is_favorite').defaultTo(false).notNullable()
+      table.boolean('has_joined').defaultTo(false).notNullable()
+      table.timestamp('created_at').notNullable()
+      table.timestamp('updated_at').nullable()
+
+      // Prevent duplicate participation per (user, event)
+      table.unique(['user_id', 'event_id'])
 
       table
-        .integer('user_id')
-        .unsigned()
-        .notNullable()
+        .foreign('user_id')
         .references('id')
         .inTable('users')
         .onDelete('CASCADE')
 
       table
-        .integer('event_id')
-        .unsigned()
-        .notNullable()
+        .foreign('event_id')
         .references('id')
         .inTable('events')
         .onDelete('CASCADE')
 
-      table.boolean('is_favorite').defaultTo(false).notNullable()
-      table.boolean('has_joined').defaultTo(false).notNullable()
-
-      table.timestamp('created_at').notNullable()
-      table.timestamp('updated_at').nullable()
+      // Speed up listing by event and creation date
+      table.index(['event_id', 'created_at'])
+      // Speed up queries by user (favorites/joined per user)
+      table.index(['user_id'])
     })
   }
 

@@ -25,6 +25,9 @@ export default class extends BaseSchema {
 
       table.timestamp('created_at').notNullable().defaultTo(this.now())
       table.timestamp('updated_at').nullable().defaultTo(this.now())
+
+      // Prevent duplicate artist assignment per (event, artist)
+      table.unique(['event_id', 'artist_id'])
     })
   }
 

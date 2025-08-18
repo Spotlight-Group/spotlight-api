@@ -25,6 +25,10 @@ export default class extends BaseSchema {
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()
+
+      // Helpful indexes for filtering
+      table.index(['start_date'])
+      table.index(['city'])
     })
   }
 

@@ -16,18 +16,22 @@ export default class ForgotPasswordController {
    * @responseBody 404 - {"message": "User with this email address not found"} - User not found
    * @responseBody 500 - {"message": "An error occurred while sending the password reset link", "error": "..."} - Server error
    */
-  async handle({ request, response }: HttpContext) {
-    const email = request.input('email')
+  async handle({ request, response, logger }: HttpContext) {
+    const rawEmail = String(request.input('email') || '').toLowerCase()
+    const emailMasked = rawEmail ? rawEmail.replace(/(.{2}).+(@.+)/, '$1***$2') : undefined
+    logger.info({ event: 'password.reset.request.attempt', emailMasked })
 
     try {
-      const user = await this.usersService.sendPasswordReset(email)
+      const user = await this.usersService.sendPasswordReset(rawEmail)
 
       if (!user) {
+        logger.warn({ event: 'password.reset.request.user_not_found', emailMasked })
         return response.notFound({
           message: 'User with this email address not found',
         })
       }
 
+      logger.info({ event: 'password.reset.request.sent', userId: user.id })
       return response.ok({
         message: 'Password reset link sent successfully',
         data: {
@@ -35,10 +39,10 @@ export default class ForgotPasswordController {
           email: user.email,
         },
       })
-    } catch (error) {
+    } catch (error: any) {
+      logger.error({ event: 'password.reset.request.error', err: error?.message })
       return response.internalServerError({
         message: 'An error occurred while sending the password reset link',
-        error: error.message,
       })
     }
   }

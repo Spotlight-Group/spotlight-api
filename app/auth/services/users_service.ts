@@ -11,6 +11,7 @@ export interface UpdateUserData {
   full_name?: string
   email?: string
   password?: string
+  bannerUrl?: string
 }
 
 export interface ResetPasswordData {
@@ -26,8 +27,8 @@ export class UsersService {
     'https://unavatar.io/{email}?fallback=https://avatar.vercel.sh/{fullName}?size=128'
 
   constructor(
-    private driveService: DriveService,
-    private emailsService: EmailsService
+    private driveService: DriveService = new DriveService(),
+    private emailsService: EmailsService = new EmailsService()
   ) {}
 
   /**
@@ -37,7 +38,9 @@ export class UsersService {
    * @returns {Promise<User>} - The authenticated user.
    */
   async attempt(email: string, password: string): Promise<User> {
-    return await User.verifyCredentials(email, password)
+    const user = await User.verifyCredentials(email, password)
+    ;(user as any).password = undefined
+    return user
   }
 
   /**
@@ -46,16 +49,21 @@ export class UsersService {
    * @returns {Promise<User>} - The registered user.
    */
   async register(data: Partial<User>): Promise<User> {
-    const bannerUrl = this.DEFAULT_BANNER_URL_TEMPLATE.replace('{email}', data.email || '').replace(
-      '{fullName}',
-      data.full_name || ''
-    )
+    const bannerUrl =
+      data.bannerUrl ??
+      this.DEFAULT_BANNER_URL_TEMPLATE.replace('{email}', data.email || '').replace(
+        '{fullName}',
+        data.full_name || ''
+      )
 
-    return await User.create({
+    const user = await User.create({
       ...data,
       bannerUrl,
       role: data.role || UserRoles.USER, // Set default role to USER
     })
+
+    ;(user as any).password = undefined
+    return user
   }
 
   /**
@@ -73,6 +81,7 @@ export class UsersService {
     if (data.full_name !== undefined) user.full_name = data.full_name
     if (data.email !== undefined) user.email = data.email
     if (data.password !== undefined) user.password = data.password
+    if (data.bannerUrl !== undefined) user.bannerUrl = data.bannerUrl
 
     // Handle banner update if provided
     if (banner) {
@@ -268,6 +277,22 @@ export class UsersService {
    */
   async getById(id: number): Promise<User> {
     return await this.findUserOrFail(id)
+  }
+
+  /**
+   * Finds a user by ID.
+   * Returns null when not found (used by unit tests)
+   */
+  async findById(id: number): Promise<User | null> {
+    return await User.find(id)
+  }
+
+  /**
+   * Finds a user by email.
+   * Returns null when not found (used by unit tests)
+   */
+  async findByEmail(email: string): Promise<User | null> {
+    return await User.findBy('email', email)
   }
 
   /**

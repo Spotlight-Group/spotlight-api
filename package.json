@@ -5,10 +5,15 @@
   "type": "module",
   "license": "UNLICENSED",
   "scripts": {
-    "start": "node bin/server.js",
-    "build": "node ace build",
     "dev": "node ace serve --hmr",
+    "build": "node ace build",
+    "start": "node build/server.js",
     "test": "node ace test",
+    "test:watch": "node ace test --watch",
+    "test:ci": "node ace test --reporter spec",
+    "migration:run": "node ace migration:run",
+    "migration:rollback": "node ace migration:rollback",
+    "db:seed": "node ace db:seed",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit"

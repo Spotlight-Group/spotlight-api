@@ -22,6 +22,11 @@ export default class extends BaseSchema {
       table.timestamp('updated_at')
       table.timestamp('last_used_at').nullable()
       table.timestamp('expires_at').nullable()
+
+      // Uniqueness and lookup indexes
+      table.unique(['hash'])
+      table.index(['tokenable_id'])
+      table.index(['expires_at'])
     })
   }
 

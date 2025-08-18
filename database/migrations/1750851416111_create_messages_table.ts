@@ -27,6 +27,10 @@ export default class extends BaseSchema {
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()
+
+      // Indexes for common reads
+      table.index(['event_id', 'created_at'])
+      table.index(['user_id'])
     })
   }
 

@@ -20,19 +20,30 @@ export default class UpdateUserController {
    * @responseBody 403 - {"message": "You can only update your own profile"} - Forbidden access
    * @responseBody 500 - {"message": "An error occurred while updating the user", "error": "string"} - Internal server error
    */
-  async handle({ request, response, auth, params }: HttpContext) {
+  async handle({ request, response, auth, params, logger }: HttpContext) {
     try {
       // Ensure user is authenticated
       if (!auth.user) {
+        logger.warn({ event: 'user.update.unauthenticated' })
         return response.unauthorized({
           message: 'Authentication required',
         })
       }
 
       const userId = params.id ? Number.parseInt(params.id) : auth.user.id
+      logger.info({
+        event: 'user.update.attempt',
+        actorUserId: auth.user.id,
+        targetUserId: userId,
+      })
 
       // Users can only update their own profile unless they're admin
       if (userId !== auth.user.id) {
+        logger.warn({
+          event: 'user.update.forbidden',
+          actorUserId: auth.user.id,
+          targetUserId: userId,
+        })
         return response.forbidden({
           message: 'You can only update your own profile',
         })
@@ -43,6 +54,11 @@ export default class UpdateUserController {
 
       const user = await this.usersService.update(userId, payload, banner || undefined)
 
+      logger.info({
+        event: 'user.update.success',
+        userId: user.id,
+        bannerProvided: Boolean(banner),
+      })
       return response.ok({
         message: 'User updated successfully',
         data: {
@@ -52,9 +68,10 @@ export default class UpdateUserController {
           bannerUrl: user.bannerUrl,
         },
       })
-    } catch (error) {
+    } catch (error: any) {
       // Handle validation errors
-      if (error.messages) {
+      if (error?.messages) {
+        logger.warn({ event: 'user.update.validation_failed', issues: error.messages })
         return response.badRequest({
           message: 'Validation failed',
           errors: error.messages,
@@ -62,9 +79,9 @@ export default class UpdateUserController {
       }
 
       // Handle other errors
+      logger.error({ event: 'user.update.error', err: error?.message })
       return response.internalServerError({
         message: 'An error occurred while updating the user',
-        error: error.message,
       })
     }
   }
