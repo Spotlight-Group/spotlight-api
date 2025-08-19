@@ -1,12 +1,7 @@
 import { test } from '@japa/runner'
-import { ApiClient } from '@japa/api-client'
 
 test.group('Events - Bookmarks Controller', () => {
-  test('should create a bookmark for authenticated user', async ({
-    client,
-  }: {
-    client: ApiClient
-  }) => {
+  test('should create a bookmark for authenticated user', async ({ client, assert }) => {
     // Register and login a user
     const registerResponse = await client.post('/register').json({
       full_name: 'Test User',
@@ -20,24 +15,16 @@ test.group('Events - Bookmarks Controller', () => {
     const response = await client.post('/bookmarks').bearerToken(token).json({ eventId: 1 })
 
     // Should succeed or return appropriate error if event doesn't exist
-    expect([200, 201, 404]).toContain(response.response.status)
+    assert.include([200, 201, 404], response.response.status)
   })
 
-  test('should return 401 for unauthenticated bookmark creation', async ({
-    client,
-  }: {
-    client: ApiClient
-  }) => {
+  test('should return 401 for unauthenticated bookmark creation', async ({ client }) => {
     const response = await client.post('/bookmarks').json({ eventId: 1 })
 
     response.assertStatus(401)
   })
 
-  test('should delete a bookmark for authenticated user', async ({
-    client,
-  }: {
-    client: ApiClient
-  }) => {
+  test('should delete a bookmark for authenticated user', async ({ client, assert }) => {
     // Register and login a user
     const registerResponse = await client.post('/register').json({
       full_name: 'Test User',
@@ -51,20 +38,16 @@ test.group('Events - Bookmarks Controller', () => {
     const response = await client.delete('/bookmarks/1').bearerToken(token)
 
     // Should succeed or return appropriate error
-    expect([200, 204, 404]).toContain(response.response.status)
+    assert.include([200, 204, 404], response.response.status)
   })
 
-  test('should return 401 for unauthenticated bookmark deletion', async ({
-    client,
-  }: {
-    client: ApiClient
-  }) => {
+  test('should return 401 for unauthenticated bookmark deletion', async ({ client }) => {
     const response = await client.delete('/bookmarks/1')
 
     response.assertStatus(401)
   })
 
-  test('should get user bookmarks', async ({ client }: { client: ApiClient }) => {
+  test('should get user bookmarks', async ({ client, assert }) => {
     // Register and login a user
     const registerResponse = await client.post('/register').json({
       full_name: 'Test User',
@@ -81,20 +64,16 @@ test.group('Events - Bookmarks Controller', () => {
     response.assertBodyContains(['data'])
 
     const body = response.body()
-    expect(body.data).toBeInstanceOf(Array)
+    assert.isArray(body.data)
   })
 
-  test('should return 401 for unauthenticated bookmark listing', async ({
-    client,
-  }: {
-    client: ApiClient
-  }) => {
+  test('should return 401 for unauthenticated bookmark listing', async ({ client }) => {
     const response = await client.get('/bookmarks')
 
     response.assertStatus(401)
   })
 
-  test('should handle bookmark pagination', async ({ client }: { client: ApiClient }) => {
+  test('should handle bookmark pagination', async ({ client, assert }) => {
     // Register and login a user
     const registerResponse = await client.post('/register').json({
       full_name: 'Test User',
@@ -114,15 +93,15 @@ test.group('Events - Bookmarks Controller', () => {
     response.assertBodyContains(['data'])
 
     const body = response.body()
-    expect(body.data).toBeInstanceOf(Array)
+    assert.isArray(body.data)
     // Check if pagination meta is included
     if (body.meta) {
-      expect(body.meta).toHaveProperty('currentPage')
-      expect(body.meta).toHaveProperty('perPage')
+      assert.property(body.meta, 'currentPage')
+      assert.property(body.meta, 'perPage')
     }
   })
 
-  test('should prevent duplicate bookmarks', async ({ client }: { client: ApiClient }) => {
+  test('should prevent duplicate bookmarks', async ({ client, assert }) => {
     // Register and login a user
     const registerResponse = await client.post('/register').json({
       full_name: 'Test User',
@@ -140,15 +119,11 @@ test.group('Events - Bookmarks Controller', () => {
     // First should succeed or fail if event doesn't exist
     // Second should return conflict or be idempotent
     if (firstResponse.response.status === 201 || firstResponse.response.status === 200) {
-      expect([200, 409]).toContain(secondResponse.response.status)
+      assert.include([200, 409], secondResponse.response.status)
     }
   })
 
-  test('should handle invalid event ID for bookmark creation', async ({
-    client,
-  }: {
-    client: ApiClient
-  }) => {
+  test('should handle invalid event ID for bookmark creation', async ({ client }) => {
     // Register and login a user
     const registerResponse = await client.post('/register').json({
       full_name: 'Test User',
@@ -164,11 +139,7 @@ test.group('Events - Bookmarks Controller', () => {
     response.assertStatus(404)
   })
 
-  test('should handle invalid event ID for bookmark deletion', async ({
-    client,
-  }: {
-    client: ApiClient
-  }) => {
+  test('should handle invalid event ID for bookmark deletion', async ({ client }) => {
     // Register and login a user
     const registerResponse = await client.post('/register').json({
       full_name: 'Test User',
@@ -184,7 +155,7 @@ test.group('Events - Bookmarks Controller', () => {
     response.assertStatus(404)
   })
 
-  test('should handle non-numeric event ID', async ({ client }: { client: ApiClient }) => {
+  test('should handle non-numeric event ID', async ({ client, assert }) => {
     // Register and login a user
     const registerResponse = await client.post('/register').json({
       full_name: 'Test User',
@@ -197,14 +168,10 @@ test.group('Events - Bookmarks Controller', () => {
     // Try to bookmark with invalid event ID
     const response = await client.post('/bookmarks').bearerToken(token).json({ eventId: 'invalid' })
 
-    expect([400, 422, 404]).toContain(response.response.status)
+    assert.include([400, 422, 404], response.response.status)
   })
 
-  test('should return empty array for user with no bookmarks', async ({
-    client,
-  }: {
-    client: ApiClient
-  }) => {
+  test('should return empty array for user with no bookmarks', async ({ client, assert }) => {
     // Register and login a new user
     const registerResponse = await client.post('/register').json({
       full_name: 'New User',
@@ -221,15 +188,11 @@ test.group('Events - Bookmarks Controller', () => {
     response.assertBodyContains(['data'])
 
     const body = response.body()
-    expect(body.data).toBeInstanceOf(Array)
-    expect(body.data).toHaveLength(0)
+    assert.isArray(body.data)
+    assert.lengthOf(body.data, 0)
   })
 
-  test('should handle concurrent bookmark operations', async ({
-    client,
-  }: {
-    client: ApiClient
-  }) => {
+  test('should handle concurrent bookmark operations', async ({ client, assert }) => {
     // Register and login a user
     const registerResponse = await client.post('/register').json({
       full_name: 'Concurrent User',
@@ -249,6 +212,6 @@ test.group('Events - Bookmarks Controller', () => {
     // At least one should succeed, others should handle gracefully
     const successfulResponses = responses.filter((r) => [200, 201].includes(r.response.status))
 
-    expect(successfulResponses.length).toBeGreaterThanOrEqual(0)
+    assert.isAtLeast(successfulResponses.length, 0)
   })
 })

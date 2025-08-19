@@ -128,6 +128,11 @@ test.group('Auth - Users Service', () => {
     const registeredUser = await usersService.register(userData)
     const foundUser = await usersService.findById(registeredUser.id)
 
+    if (!foundUser) {
+      assert.fail('User should exist')
+      return
+    }
+
     assert.isObject(foundUser)
     assert.equal(foundUser.id, registeredUser.id)
     assert.equal(foundUser.email, 'find.user.service@example.com')
@@ -152,6 +157,11 @@ test.group('Auth - Users Service', () => {
 
     await usersService.register(userData)
     const foundUser = await usersService.findByEmail('email.find.service@example.com')
+
+    if (!foundUser) {
+      assert.fail('User should exist')
+      return
+    }
 
     assert.isObject(foundUser)
     assert.equal(foundUser.email, 'email.find.service@example.com')
@@ -219,6 +229,11 @@ test.group('Auth - Users Service', () => {
 
     // Find user directly from database to check password hash
     const user = await User.findBy('email', 'hash.test.service@example.com')
+
+    if (!user) {
+      assert.fail('User should exist in the database')
+      return
+    }
 
     assert.exists(user)
     assert.notEqual(user.password, 'password123') // Password should be hashed

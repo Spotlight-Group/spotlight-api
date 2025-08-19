@@ -69,7 +69,7 @@ test.group('Events - Create Event Controller', () => {
 
     const token = registerResponse.body().token.value
 
-    // Try to create event with missing required fields
+    // Try to create an event with missing required fields
     const response = await client.post('/events').bearerToken(token).json({
       title: 'Incomplete Event',
       // missing required fields
@@ -236,8 +236,10 @@ test.group('Events - Create Event Controller', () => {
 
   test('should create event with minimal required fields', async ({
     client,
+    assert,
   }: {
     client: ApiClient
+    assert: any
   }) => {
     // Register and login a user
     const registerResponse = await client.post('/register').json({
@@ -260,7 +262,7 @@ test.group('Events - Create Event Controller', () => {
 
     const response = await client.post('/events').bearerToken(token).json(minimalEventData)
 
-    // Should succeed or return appropriate validation error
-    expect([200, 201, 422]).toContain(response.response.status)
+    // Should succeed or return the appropriate validation error
+    assert.oneOf(response.response.status, [200, 201, 422])
   })
 })
