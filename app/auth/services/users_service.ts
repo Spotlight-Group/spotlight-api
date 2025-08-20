@@ -38,9 +38,7 @@ export class UsersService {
    * @returns {Promise<User>} - The authenticated user.
    */
   async attempt(email: string, password: string): Promise<User> {
-    const user = await User.verifyCredentials(email, password)
-    ;(user as any).password = undefined
-    return user
+    return await User.verifyCredentials(email, password)
   }
 
   /**
@@ -56,14 +54,11 @@ export class UsersService {
         data.full_name || ''
       )
 
-    const user = await User.create({
+    return await User.create({
       ...data,
       bannerUrl,
       role: data.role || UserRoles.USER, // Set default role to USER
     })
-
-    ;(user as any).password = undefined
-    return user
   }
 
   /**

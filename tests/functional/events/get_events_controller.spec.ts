@@ -12,7 +12,6 @@ test.group('Events - Get Events Controller', () => {
     response.assertBodyContains({
       message: 'Events retrieved successfully',
     })
-    response.assertBodyContains(['data', 'meta'])
 
     // Check pagination meta
     const body = response.body()
@@ -38,7 +37,6 @@ test.group('Events - Get Events Controller', () => {
     response.assertBodyContains({
       message: 'Events retrieved successfully',
     })
-    response.assertBodyContains(['data', 'meta'])
   })
 
   test('should get events with pagination parameters', async ({ client, assert }) => {

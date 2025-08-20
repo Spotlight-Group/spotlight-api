@@ -69,7 +69,7 @@ router.get('/scrap/events/toulouse', [ScrapeEventsController]).as('events.scrape
 // Pages CLIENT
 router
   .group(() => {
-    // Events CRUD routes - GET routes accessible to all authenticated users
+    // Events GET routes - require authentication
     router.get('/events', [GetEventsController]).as('events.index')
     router.get('/events/:id', [GetEventController]).as('events.show')
 

@@ -17,7 +17,7 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 
 export default class User extends compose(BaseModel, AuthFinder) {
   @beforeSave()
-  static async hashPassword(user: User) {
+  static async hashPasswordHook(user: User) {
     if (user.$dirty.password) {
       user.password = await hash.use('scrypt').make(user.password)
     }

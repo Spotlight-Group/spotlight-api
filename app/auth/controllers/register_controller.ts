@@ -23,6 +23,11 @@ export default class RegisterController {
     const emailMasked = email ? email.replace(/(.{2}).+(@.+)/, '$1***$2') : undefined
     logger.info({ event: 'user.register.attempt', emailMasked })
 
+    // If a bearer token is present, attempt to authenticate to detect already logged-in state
+    try {
+      await auth.authenticate()
+    } catch {}
+
     if (auth.user) {
       logger.warn({ event: 'user.register.already_logged_in', userId: auth.user.id })
       return response.status(400).json({
