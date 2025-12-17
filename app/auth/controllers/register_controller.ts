@@ -18,7 +18,7 @@ export default class RegisterController {
    * @responseBody 400 - {"message": "You are already logged in"} - Already logged in
    * @responseBody 422 - {"message": "Validation failed", "errors": []} - Validation error
    */
-  async handle({ request, response, auth, logger }: HttpContext) {
+  async handle({ request, response, auth, logger }: HttpContext): Promise<void> {
     const email = String(request.input('email') || '').toLowerCase()
     const emailMasked = email ? email.replace(/(.{2}).+(@.+)/, '$1***$2') : undefined
     logger.info({ event: 'user.register.attempt', emailMasked })

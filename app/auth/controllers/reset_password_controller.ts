@@ -17,7 +17,7 @@ export default class ResetPasswordController {
    * @responseBody 400 - {"message": "Invalid or expired token"} - Token validation failed
    * @responseBody 500 - {"message": "An error occurred", "error": "string"} - Internal server error
    */
-  async show({ params, response, logger }: HttpContext) {
+  async show({ params, response, logger }: HttpContext): Promise<void> {
     try {
       logger.info({ event: 'password.reset.show.attempt' })
       const { token } = params
@@ -58,7 +58,7 @@ export default class ResetPasswordController {
    * @responseBody 404 - {"message": "User with this email address not found"} - User not found
    * @responseBody 500 - {"message": "An error occurred while resetting the password", "error": "string"} - Internal server error
    */
-  async handle({ request, response, logger }: HttpContext) {
+  async handle({ request, response, logger }: HttpContext): Promise<void> {
     try {
       const payload = await request.validateUsing(resetPasswordValidator)
       const emailMasked = payload.email

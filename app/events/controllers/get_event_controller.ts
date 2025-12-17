@@ -18,7 +18,7 @@ export default class GetEventController {
    * @responseBody 404 - {"message": "Event not found", "error": "EVENT_NOT_FOUND"} - Event not found
    * @responseBody 500 - {"message": "An error occurred while retrieving the event", "error": "string"} - Internal server error
    */
-  async handle({ request, response, params, auth }: HttpContext) {
+  async handle({ request, response, params, auth }: HttpContext): Promise<void> {
     try {
       const { id: eventId } = await request.validateUsing(eventIdValidator, {
         data: params,

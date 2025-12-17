@@ -1,4 +1,52 @@
+# Dependencies
 node_modules
 npm-debug.log
-.git
+yarn.lock
+package-lock.json
+
+# Environment files
 .env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build
+dist
+tmp
+*.log
+
+# Test files
+tests
+coverage
+.nyc_output
+
+# Documentation
+*.md
+!README.md
+docs
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore

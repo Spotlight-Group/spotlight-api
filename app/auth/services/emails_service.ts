@@ -115,10 +115,6 @@ export class EmailsService {
 
     const htmlContent = this.generatePasswordResetHtml(user.full_name, resetLink)
 
-    await this.sendEmail(
-      user.email,
-      'Réinitialisation de votre mot de passe',
-      htmlContent
-    )
+    await this.sendEmail(user.email, 'Réinitialisation de votre mot de passe', htmlContent)
   }
 }

@@ -4,6 +4,7 @@ import { cuid } from '@adonisjs/core/helpers'
 import { unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import { inject } from '@adonisjs/core'
+import BadRequestException from '#exceptions/bad_request_exception'
 
 export interface UploadConfig {
   uploadsPath: string
@@ -19,11 +20,13 @@ export class DriveService {
    * Validates that the uploaded file has an allowed extension
    * @param file - The file to validate
    * @param allowedExtensions - Array of allowed file extensions
-   * @throws Error if file type is not allowed
+   * @throws Error if a file type is not allowed
    */
   validateFileType(file: MultipartFile, allowedExtensions: string[]): void {
     if (!allowedExtensions.includes(file.extname || '')) {
-      throw new Error(`Invalid file type. Allowed types: ${allowedExtensions.join(', ')}`)
+      throw new BadRequestException(
+        `Invalid file type. Allowed types: ${allowedExtensions.join(', ')}`
+      )
     }
   }
 
@@ -73,7 +76,7 @@ export class DriveService {
         const fullPath = join(app.publicPath(config.uploadsPath), fileName)
         await unlink(fullPath)
       } catch (error) {
-        // Log the error but don't fail the operation if file doesn't exist
+        // Log the error but don't fail the operation if a file doesn't exist
         console.warn(
           `Failed to delete ${config.entityType} file for ${config.entityType} ${entityId}:`,
           error.message
@@ -94,12 +97,12 @@ export class DriveService {
     config: UploadConfig,
     oldFilePath?: string | null
   ): Promise<string> {
-    // Delete old file first
+    // Delete an old file first
     if (oldFilePath) {
       await this.deleteFile(oldFilePath, config, config.entityId)
     }
 
-    // Upload new file
+    // Upload a new file
     return await this.uploadFile(file, config)
   }
 }

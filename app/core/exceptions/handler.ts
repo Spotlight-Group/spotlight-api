@@ -1,5 +1,6 @@
 import app from '@adonisjs/core/services/app'
 import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
+import logger from '@adonisjs/core/services/logger'
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   /**
@@ -13,6 +14,17 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * response to the client
    */
   async handle(error: unknown, ctx: HttpContext) {
+    // Log all errors with full details
+    logger.error({
+      event: 'exception.occurred',
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      url: ctx.request.url(),
+      method: ctx.request.method(),
+      ip: ctx.request.ip(),
+      userId: ctx.auth?.user?.id,
+    })
+
     return super.handle(error, ctx)
   }
 

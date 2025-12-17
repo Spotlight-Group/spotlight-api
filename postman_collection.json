@@ -1,2891 +1,2853 @@
 {
-	"info": {
-		"_postman_id": "9ec2cc3e-6a79-4d07-a179-2c7fe7cdaa6f",
-		"name": "Spotlight API - Complete Collection",
-		"description": "Complete collection for testing all features in Spotlight API including Authentication (with OAuth support for Google, Facebook, GitHub, Twitter), User Management, Events, Artists, Messages, and comprehensive testing scenarios",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
-		"_exporter_id": "18509415"
-	},
-	"item": [
-		{
-			"name": "Authentication",
-			"item": [
-				{
-					"name": "Login as Admin (Seeded)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.collectionVariables.set('admin_token', response.token.value.release());",
-									"    pm.collectionVariables.set('admin_user_id', response.user.id);",
-									"    pm.test('Admin login successful', () => {",
-									"        pm.expect(response.user).to.have.property('id');",
-									"        pm.expect(response.user).to.have.property('email');",
-									"        pm.expect(response.user.email).to.eql('admin@spotlight.com');",
-									"        pm.expect(response.token).to.have.property('value');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"admin@spotlight.com\",\n  \"password\": \"admin123\"\n}"
-						},
-						"url": "{{base_url}}/login",
-						"description": "Login with seeded admin account"
-					},
-					"response": []
-				},
-				{
-					"name": "Login as Regular User (Seeded)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.collectionVariables.set('user_token', response.token.value.release());",
-									"    pm.collectionVariables.set('regular_user_id', response.user.id);",
-									"    pm.test('User login successful', () => {",
-									"        pm.expect(response.user).to.have.property('id');",
-									"        pm.expect(response.user).to.have.property('email');",
-									"        pm.expect(response.user.email).to.eql('user@spotlight.com');",
-									"        pm.expect(response.token).to.have.property('value');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"user@spotlight.com\",\n  \"password\": \"user123\"\n}"
-						},
-						"url": "{{base_url}}/login",
-						"description": "Login with seeded regular user account"
-					},
-					"response": []
-				},
-				{
-					"name": "Register User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    pm.collectionVariables.set('auth_token', response.token.value.release());",
-									"    pm.collectionVariables.set('user_id', response.user.id);",
-									"    pm.test('Registration successful', () => {",
-									"        pm.expect(response.user).to.have.property('id');",
-									"        pm.expect(response.user).to.have.property('email');",
-									"        pm.expect(response.token).to.have.property('value');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"full_name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
-						},
-						"url": "{{base_url}}/register",
-						"description": "Register a new user account"
-					},
-					"response": []
-				},
-				{
-					"name": "Login User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.collectionVariables.set('auth_token', response.token.value.release());",
-									"    pm.collectionVariables.set('user_id', response.user.id);",
-									"    pm.test('Login successful', () => {",
-									"        pm.expect(response.user).to.have.property('id');",
-									"        pm.expect(response.user).to.have.property('email');",
-									"        pm.expect(response.token).to.have.property('value');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
-						},
-						"url": "{{base_url}}/login",
-						"description": "Login with existing user credentials"
-					},
-					"response": []
-				},
-				{
-					"name": "OAuth Google Redirect",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/oauth/google",
-						"description": "Redirect to Google OAuth authorization page"
-					},
-					"response": []
-				},
-				{
-					"name": "OAuth Facebook Redirect - Invalid Provider",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/oauth/facebook",
-						"description": "Redirect to Facebook OAuth authorization page"
-					},
-					"response": []
-				},
-				{
-					"name": "OAuth Google Callback",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.collectionVariables.set('auth_token', response.token.value.release());",
-									"    pm.collectionVariables.set('user_id', response.user.id);",
-									"    pm.test('OAuth login successful', () => {",
-									"        pm.expect(response.user).to.have.property('id');",
-									"        pm.expect(response.user).to.have.property('email');",
-									"        pm.expect(response.token).to.have.property('value');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/oauth/google/callback?code={{oauth_code}}&state={{oauth_state}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"oauth",
-								"google",
-								"callback"
-							],
-							"query": [
-								{
-									"key": "code",
-									"value": "{{oauth_code}}",
-									"description": "Authorization code from Google"
-								},
-								{
-									"key": "state",
-									"value": "{{oauth_state}}",
-									"description": "State parameter for security"
-								}
-							]
-						},
-						"description": "Handle Google OAuth callback with authorization code"
-					},
-					"response": []
-				},
-				{
-					"name": "OAuth Facebook Callback - Invalid Provider",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.collectionVariables.set('auth_token', response.token.value.release());",
-									"    pm.collectionVariables.set('user_id', response.user.id);",
-									"    pm.test('OAuth login successful', () => {",
-									"        pm.expect(response.user).to.have.property('id');",
-									"        pm.expect(response.user).to.have.property('email');",
-									"        pm.expect(response.token).to.have.property('value');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/oauth/facebook/callback?code={{oauth_code}}&state={{oauth_state}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"oauth",
-								"facebook",
-								"callback"
-							],
-							"query": [
-								{
-									"key": "code",
-									"value": "{{oauth_code}}",
-									"description": "Authorization code from Facebook"
-								},
-								{
-									"key": "state",
-									"value": "{{oauth_state}}",
-									"description": "State parameter for security"
-								}
-							]
-						},
-						"description": "Handle Facebook OAuth callback with authorization code"
-					},
-					"response": []
-				},
-				{
-					"name": "OAuth Google Unlink",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": "{{base_url}}/oauth/google/unlink",
-						"description": "Unlink Google OAuth account from current user"
-					},
-					"response": []
-				},
-				{
-					"name": "OAuth Facebook Unlink - Invalid Provider",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": "{{base_url}}/oauth/facebook/unlink",
-						"description": "Unlink Facebook OAuth account from current user"
-					},
-					"response": []
-				},
-				{
-					"name": "Forgot Password - Valid Email",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 302 (redirect)', () => {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
-									"});",
-									"",
-									"pm.test('Response indicates success or redirect', () => {",
-									"    // For successful password reset request, we expect either:",
-									"    // - 302 redirect (if using session flash messages)",
-									"    // - 200 with success message",
-									"    if (pm.response.code === 200) {",
-									"        const response = pm.response.json();",
-									"        pm.expect(response).to.have.property('message');",
-									"    }",
-									"});",
-									"",
-									"console.log('Forgot password request sent for valid email');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"john.doe@example.com\"\n}"
-						},
-						"url": "{{base_url}}/forgot-password",
-						"description": "Send password reset email to a valid registered email address"
-					},
-					"response": []
-				},
-				{
-					"name": "Forgot Password - Invalid Email",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 302 (redirect)', () => {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
-									"});",
-									"",
-									"pm.test('Response handles invalid email gracefully', () => {",
-									"    // The endpoint should handle invalid emails gracefully",
-									"    // without revealing whether the email exists or not",
-									"    if (pm.response.code === 200) {",
-									"        const response = pm.response.json();",
-									"        pm.expect(response).to.have.property('message');",
-									"    }",
-									"});",
-									"",
-									"console.log('Forgot password request sent for invalid email');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"nonexistent@example.com\"\n}"
-						},
-						"url": "{{base_url}}/forgot-password",
-						"description": "Test forgot password with non-existent email address"
-					},
-					"response": []
-				},
-				{
-					"name": "Forgot Password - Render Form",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/forgot-password",
-						"description": "Render the forgot password form (if using server-side rendering)"
-					},
-					"response": []
-				},
-				{
-					"name": "Reset Password",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Status code is 200 or 302', () => {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
-									"});",
-									"",
-									"pm.test('Password reset processed', () => {",
-									"    if (pm.response.code === 200) {",
-									"        const response = pm.response.json();",
-									"        pm.expect(response).to.have.property('message');",
-									"    }",
-									"});",
-									"",
-									"console.log('Password reset request processed');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"newPassword\": \"newpassword123\",\n  \"token\": \"{{reset_token}}\"\n}"
-						},
-						"url": "{{base_url}}/reset-password",
-						"description": "Reset password using token from email (replace {{reset_token}} with actual token from email)"
-					},
-					"response": []
-				}
-			],
-			"description": "Authentication endpoints for user registration, login, and OAuth"
-		},
-		{
-			"name": "User Management",
-			"item": [
-				{
-					"name": "Update User Profile",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "full_name",
-									"value": "John Updated Doe",
-									"type": "text"
-								},
-								{
-									"key": "email",
-									"value": "john.updated@example.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "newpassword123",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "banner",
-									"type": "file",
-									"src": [],
-									"disabled": true
-								}
-							]
-						},
-						"url": "{{base_url}}/users/{{user_id}}",
-						"description": "Update user profile information with optional banner image upload. You can enable/disable fields as needed."
-					},
-					"response": []
-				},
-				{
-					"name": "Update User Profile (JSON)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"full_name\": \"John Updated Doe\",\n  \"email\": \"john.updated@example.com\"\n}"
-						},
-						"url": "{{base_url}}/users/{{user_id}}",
-						"description": "Update user profile information (JSON format, without file upload)"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Current User Profile",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.test('User profile retrieved successfully', () => {",
-									"        pm.expect(response.data).to.have.property('id');",
-									"        pm.expect(response.data).to.have.property('email');",
-									"        pm.expect(response.data).to.have.property('full_name');",
-									"        pm.expect(response.message).to.equal('User retrieved successfully');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/users/me",
-						"description": "Get the authenticated user's profile information"
-					},
-					"response": [
-						{
-							"name": "Success Response",
-							"originalRequest": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{auth_token}}",
-										"type": "text"
-									}
-								],
-								"url": "{{base_url}}/users/me"
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"cookie": [],
-							"body": "{\n  \"message\": \"User retrieved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"full_name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"bannerUrl\": \"https://unavatar.io/john.doe@example.com?fallback=https://avatar.vercel.sh/John Doe?size=128\",\n    \"role\": \"user\",\n    \"createdAt\": \"2024-01-01T00:00:00.000Z\",\n    \"updatedAt\": \"2024-01-01T00:00:00.000Z\"\n  }\n}"
-						}
-					]
-				},
-				{
-					"name": "Update User Profile (Current User)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "full_name",
-									"value": "John Current User",
-									"type": "text"
-								},
-								{
-									"key": "banner",
-									"type": "file",
-									"src": [],
-									"disabled": true
-								}
-							]
-						},
-						"url": "{{base_url}}/users/me",
-						"description": "Update current authenticated user's profile. All fields are optional. Banner upload is optional."
-					},
-					"response": []
-				},
-				{
-					"name": "Upload User Banner",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "banner",
-									"type": "file",
-									"src": []
-								}
-							]
-						},
-						"url": "{{base_url}}/users/{{user_id}}/banner",
-						"description": "Upload a banner image for the user profile"
-					},
-					"response": []
-				},
-				{
-					"name": "Delete User Account",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    pm.collectionVariables.set('auth_token', '');",
-									"    pm.collectionVariables.set('user_id', '');",
-									"    pm.test('User deleted successfully', () => {",
-									"        pm.expect(pm.response.json().message).to.include('deleted');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": "{{base_url}}/users/{{user_id}}",
-						"description": "Delete user account (requires authentication). This will also revoke all access tokens."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Current User Account",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    pm.collectionVariables.set('auth_token', '');",
-									"    pm.collectionVariables.set('user_id', '');",
-									"    pm.test('User deleted successfully', () => {",
-									"        pm.expect(pm.response.json().message).to.include('deleted');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": "{{base_url}}/users/me",
-						"description": "Delete current authenticated user's account"
-					},
-					"response": []
-				}
-			],
-			"description": "User profile management endpoints"
-		},
-		{
-			"name": "Password Management",
-			"item": [
-				{
-					"name": "Reset Password",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"newPassword\": \"newpassword123\"\n}"
-						},
-						"url": "{{base_url}}/reset-password",
-						"description": "Reset user password using email address"
-					},
-					"response": []
-				},
-				{
-					"name": "Change Password (Authenticated)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"password\": \"newpassword123\"\n}"
-						},
-						"url": "{{base_url}}/users/me",
-						"description": "Change password for authenticated user"
-					},
-					"response": []
-				}
-			],
-			"description": "Password management endpoints"
-		},
-		{
-			"name": "Artists Management",
-			"item": [
-				{
-					"name": "Create Artist",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    pm.collectionVariables.set('artist_id', response.data.id);",
-									"    pm.test('Artist created successfully', () => {",
-									"        pm.expect(response.data).to.have.property('id');",
-									"        pm.expect(response.data).to.have.property('name');",
-									"        pm.expect(response.data).to.have.property('image');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "name",
-									"value": "Taylor Swift",
-									"type": "text"
-								},
-								{
-									"key": "image",
-									"type": "file",
-									"src": []
-								}
-							]
-						},
-						"url": "{{base_url}}/artists",
-						"description": "Create a new artist with name and image"
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Artists",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/artists?page=1&limit=10&name=Taylor",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"artists"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1",
-									"description": "Page number for pagination"
-								},
-								{
-									"key": "limit",
-									"value": "10",
-									"description": "Number of artists per page (max 100)"
-								},
-								{
-									"key": "name",
-									"value": "Taylor",
-									"description": "Filter by artist name (partial match)",
-									"disabled": true
-								}
-							]
-						},
-						"description": "Retrieve a paginated list of artists with optional filtering by name."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Single Artist",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/artists/{{artist_id}}",
-						"description": "Retrieve detailed information about a specific artist by its ID."
-					},
-					"response": []
-				},
-				{
-					"name": "Update Artist",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "name",
-									"value": "Taylor Swift (Updated)",
-									"type": "text"
-								},
-								{
-									"key": "image",
-									"type": "file",
-									"src": [],
-									"disabled": true
-								}
-							]
-						},
-						"url": "{{base_url}}/artists/{{artist_id}}",
-						"description": "Update an existing artist. Image upload is optional."
-					},
-					"response": []
-				},
-				{
-					"name": "Update Artist (JSON)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Taylor Swift (JSON Update)\"\n}"
-						},
-						"url": "{{base_url}}/artists/{{artist_id}}",
-						"description": "Update artist name only (JSON format, without file upload)"
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Artist",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    pm.collectionVariables.set('artist_id', '');",
-									"    pm.test('Artist deleted successfully', () => {",
-									"        pm.expect(pm.response.json().message).to.include('deleted');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": "{{base_url}}/artists/{{artist_id}}",
-						"description": "Delete an artist by ID"
-					},
-					"response": []
-				}
-			],
-			"description": "Artist management endpoints for creating, updating, and deleting artists"
-		},
-		{
-			"name": "Events Management",
-			"item": [
-				{
-					"name": "Create Event",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    pm.collectionVariables.set('event_id', response.data.id);",
-									"    pm.test('Event created successfully', () => {",
-									"        pm.expect(response.data).to.have.property('id');",
-									"        pm.expect(response.data).to.have.property('title');",
-									"        pm.expect(response.data).to.have.property('bannerUrl');",
-									"        pm.expect(response.data).to.have.property('type');",
-									"        pm.expect(response.data).to.have.property('subtype');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "title",
-									"value": "Summer Music Festival 2024",
-									"type": "text"
-								},
-								{
-									"key": "description",
-									"value": "An amazing outdoor music festival featuring top artists from around the world",
-									"type": "text"
-								},
-								{
-									"key": "startDate",
-									"value": "2024-07-15",
-									"type": "text"
-								},
-								{
-									"key": "endDate",
-									"value": "2024-07-17",
-									"type": "text"
-								},
-								{
-									"key": "startHour",
-									"value": "2024-07-15 18:00:00",
-									"type": "text"
-								},
-								{
-									"key": "latitude",
-									"value": "40.7128",
-									"type": "text"
-								},
-								{
-									"key": "longitude",
-									"value": "-74.0060",
-									"type": "text"
-								},
-								{
-									"key": "placeName",
-									"value": "Central Park",
-									"type": "text"
-								},
-								{
-									"key": "address",
-									"value": "1234 Main Street, Central Park",
-									"type": "text"
-								},
-								{
-									"key": "city",
-									"value": "New York",
-									"type": "text"
-								},
-								{
-									"key": "type",
-									"value": "festival",
-									"type": "text"
-								},
-								{
-									"key": "subtype",
-									"value": "rock",
-									"type": "text"
-								},
-								{
-									"key": "banner",
-									"type": "file",
-									"src": []
-								},
-								{
-									"key": "artistIds",
-									"value": "[1, 2]",
-									"description": "Array of artist IDs to associate with the event (optional)",
-									"type": "text",
-									"disabled": true
-								}
-							]
-						},
-						"url": "{{base_url}}/events",
-						"description": "Create a new event with all required information and banner image. All fields are required except description and openHour."
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Events",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/events?page=1&limit=10&type=festival&city=New York",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"events"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1",
-									"description": "Page number for pagination"
-								},
-								{
-									"key": "limit",
-									"value": "10",
-									"description": "Number of events per page (max 100)"
-								},
-								{
-									"key": "type",
-									"value": "festival",
-									"description": "Filter by event type (concert, festival, exhibition, conference)",
-									"disabled": true
-								},
-								{
-									"key": "subtype",
-									"value": "rock",
-									"description": "Filter by event subtype (rock, hiphop, jazz, techno, classical)",
-									"disabled": true
-								},
-								{
-									"key": "city",
-									"value": "New York",
-									"description": "Filter by city name",
-									"disabled": true
-								},
-								{
-									"key": "startDate",
-									"value": "2024-01-01",
-									"description": "Filter events starting from this date (YYYY-MM-DD)",
-									"disabled": true
-								},
-								{
-									"key": "endDate",
-									"value": "2024-12-31",
-									"description": "Filter events ending before this date (YYYY-MM-DD)",
-									"disabled": true
-								}
-							]
-						},
-						"description": "Retrieve a paginated list of events with optional filtering by type, subtype, city, and date range."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Single Event",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/events/{{event_id}}",
-						"description": "Retrieve detailed information about a specific event by its ID."
-					},
-					"response": []
-				},
-				{
-					"name": "Update Event",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "title",
-									"value": "Summer Music Festival 2024 (Updated)",
-									"type": "text"
-								},
-								{
-									"key": "description",
-									"value": "An updated description for the amazing outdoor music festival",
-									"type": "text"
-								},
-								{
-									"key": "startDate",
-									"value": "2024-07-16",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "endDate",
-									"value": "2024-07-18",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "startHour",
-									"value": "2024-07-16 19:00:00",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "latitude",
-									"value": "40.7589",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "longitude",
-									"value": "-73.9851",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "placeName",
-									"value": "Times Square",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "address",
-									"value": "1 Times Square, Manhattan",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "city",
-									"value": "New York",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "type",
-									"value": "concert",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "subtype",
-									"value": "jazz",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "banner",
-									"type": "file",
-									"src": [],
-									"disabled": true
-								},
-								{
-									"key": "artistIds",
-									"value": "[1, 3]",
-									"description": "Array of artist IDs to associate with the event (optional, replaces existing associations)",
-									"type": "text",
-									"disabled": true
-								}
-							]
-						},
-						"url": "{{base_url}}/events/{{event_id}}",
-						"description": "Update an existing event. All fields are optional. You can enable/disable fields as needed. Banner upload is optional."
-					},
-					"response": []
-				},
-				{
-					"name": "Update Event (JSON)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"Summer Music Festival 2024 (JSON Update)\",\n  \"description\": \"Updated via JSON without file upload\",\n  \"type\": \"concert\",\n  \"subtype\": \"jazz\"\n}"
-						},
-						"url": "{{base_url}}/events/{{event_id}}",
-						"description": "Update event information (JSON format, without file upload). All fields are optional."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Event",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    pm.collectionVariables.set('event_id', '');",
-									"    pm.test('Event deleted successfully', () => {",
-									"        pm.expect(pm.response.json().message).to.include('deleted');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": "{{base_url}}/events/{{event_id}}",
-						"description": "Delete an event by its ID. This will also delete the associated banner image."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Event Artists",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/events/{{event_id}}/artists",
-						"description": "Retrieve all artists associated with a specific event."
-					},
-					"response": []
-				},
-				{
-					"name": "Add Artists to Event",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"artistIds\": [1, 2]\n}"
-						},
-						"url": "{{base_url}}/events/{{event_id}}/artists",
-						"description": "Add one or more artists to an existing event. Artists that are already associated will be ignored."
-					},
-					"response": []
-				},
-				{
-					"name": "Remove Artists from Event",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"artistIds\": [1]\n}"
-						},
-						"url": "{{base_url}}/events/{{event_id}}/artists",
-						"description": "Remove one or more artists from an existing event. Artists that are not associated will be ignored."
-					},
-					"response": []
-				},
-				{
-					"name": "Scrape Events Toulouse (Admin Only)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/scrap/events/toulouse",
-						"description": "Scrape events from Toulouse sources. This endpoint is restricted to admin users only and is used for testing the scraping functionality."
-					},
-					"response": []
-				}
-			],
-			"description": "Event management endpoints for creating, reading, updating, and deleting events, including artist associations"
-		},
-		{
-			"name": "Bookmarks Management",
-			"item": [
-				{
-					"name": "Add Bookmark",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    pm.test('Bookmark added successfully', () => {",
-									"        pm.expect(response).to.have.property('message');",
-									"        pm.expect(response).to.have.property('data');",
-									"        pm.expect(response.data).to.have.property('isFavorite', true);",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"eventId\": {{event_id}}\n}"
-						},
-						"url": "{{base_url}}/bookmarks",
-						"description": "Add an event to user's bookmarks"
-					},
-					"response": []
-				},
-				{
-					"name": "Get User Bookmarks",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.test('Bookmarks retrieved successfully', () => {",
-									"        pm.expect(response).to.have.property('message');",
-									"        pm.expect(response).to.have.property('data');",
-									"        pm.expect(response.data).to.have.property('data');",
-									"        pm.expect(response.data.data).to.be.an('array');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/bookmarks?page=1&limit=20",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"bookmarks"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1",
-									"description": "Page number for pagination"
-								},
-								{
-									"key": "limit",
-									"value": "20",
-									"description": "Number of bookmarks per page"
-								}
-							]
-						},
-						"description": "Get all bookmarked events for the authenticated user"
-					},
-					"response": []
-				},
-				{
-					"name": "Check Bookmark Status",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.test('Bookmark status retrieved successfully', () => {",
-									"        pm.expect(response).to.have.property('message');",
-									"        pm.expect(response).to.have.property('data');",
-									"        pm.expect(response.data).to.have.property('eventId');",
-									"        pm.expect(response.data).to.have.property('isBookmarked');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/bookmarks/check/{{event_id}}",
-						"description": "Check if an event is bookmarked by the user"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Bookmark Statistics",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.test('Bookmark statistics retrieved successfully', () => {",
-									"        pm.expect(response).to.have.property('message');",
-									"        pm.expect(response).to.have.property('data');",
-									"        pm.expect(response.data).to.have.property('totalBookmarks');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/bookmarks/stats",
-						"description": "Get bookmark statistics for the authenticated user"
-					},
-					"response": []
-				},
-				{
-					"name": "Remove Bookmark",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.test('Bookmark removed successfully', () => {",
-									"        pm.expect(response).to.have.property('message');",
-									"        pm.expect(response.message).to.include('removed successfully');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": "{{base_url}}/bookmarks/{{event_id}}",
-						"description": "Remove an event from user's bookmarks"
-					},
-					"response": []
-				}
-			],
-			"description": "Bookmark management endpoints for adding, removing, and viewing user's bookmarked events"
-		},
-		{
-			"name": "Messages Management",
-			"item": [
-				{
-					"name": "Create Message",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const response = pm.response.json();",
-									"    pm.collectionVariables.set('message_id', response.data.id);",
-									"    pm.test('Message created successfully', () => {",
-									"        pm.expect(response.data).to.have.property('id');",
-									"        pm.expect(response.data).to.have.property('content');",
-									"        pm.expect(response.data).to.have.property('eventId');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"content\": \"This is a test message for the event\",\n  \"eventId\": {{event_id}}\n}"
-						},
-						"url": "{{base_url}}/messages",
-						"description": "Create a new message for an event"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Event Messages",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.test('Messages retrieved successfully', () => {",
-									"        pm.expect(response).to.have.property('data');",
-									"        pm.expect(response.data).to.be.an('array');",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/events/{{event_id}}/messages?page=1&limit=10",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"events",
-								"{{event_id}}",
-								"messages"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1",
-									"description": "Page number for pagination"
-								},
-								{
-									"key": "limit",
-									"value": "10",
-									"description": "Number of messages per page"
-								}
-							]
-						},
-						"description": "Get all messages for a specific event with pagination"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Single Message",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/messages/{{message_id}}",
-						"description": "Get details of a specific message"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Message",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"content\": \"This is an updated message content\"\n}"
-						},
-						"url": "{{base_url}}/messages/{{message_id}}",
-						"description": "Update an existing message (only the author can update)"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Message (PATCH)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"content\": \"Partially updated message content\"\n}"
-						},
-						"url": "{{base_url}}/messages/{{message_id}}",
-						"description": "Partially update an existing message (only the author can update)"
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Message",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": {
-								"token": "{{auth_token}}"
-							}
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": "{{base_url}}/messages/{{message_id}}",
-						"description": "Delete a message (only the author can delete)"
-					},
-					"response": []
-				}
-			],
-			"description": "Message management endpoints for creating, reading, updating, and deleting messages within events"
-		},
-		{
-			"name": "🔐 Admin Workflows",
-			"item": [
-				{
-					"name": "Admin Event Management",
-					"item": [
-						{
-							"name": "Create Event (Admin Only)",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{admin_token}}"
-									}
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "title",
-											"value": "Admin Created Event",
-											"type": "text"
-										},
-										{
-											"key": "description",
-											"value": "Event created by admin user",
-											"type": "text"
-										},
-										{
-											"key": "startDate",
-											"value": "2024-08-15",
-											"type": "text"
-										},
-										{
-											"key": "endDate",
-											"value": "2024-08-15",
-											"type": "text"
-										},
-										{
-											"key": "startHour",
-											"value": "2024-08-15 20:00:00",
-											"type": "text"
-										},
-										{
-											"key": "latitude",
-											"value": "43.6047",
-											"type": "text"
-										},
-										{
-											"key": "longitude",
-											"value": "1.4442",
-											"type": "text"
-										},
-										{
-											"key": "placeName",
-											"value": "Toulouse Arena",
-											"type": "text"
-										},
-										{
-											"key": "address",
-											"value": "123 Admin Street",
-											"type": "text"
-										},
-										{
-											"key": "city",
-											"value": "Toulouse",
-											"type": "text"
-										},
-										{
-											"key": "type",
-											"value": "concert",
-											"type": "text"
-										},
-										{
-											"key": "subtype",
-											"value": "rock",
-											"type": "text"
-										},
-										{
-											"key": "banner",
-											"type": "file",
-											"src": []
-										}
-									]
-								},
-								"url": "{{base_url}}/events",
-								"description": "Create a new event (Admin only)"
-							},
-							"response": []
-						},
-						{
-							"name": "Update Event (Admin Only)",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{admin_token}}"
-									}
-								},
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "title",
-											"value": "Updated Admin Event",
-											"type": "text"
-										},
-										{
-											"key": "description",
-											"value": "Event updated by admin",
-											"type": "text"
-										},
-										{
-											"key": "banner",
-											"type": "file",
-											"src": [],
-											"disabled": true
-										}
-									]
-								},
-								"url": "{{base_url}}/events/{{event_id}}",
-								"description": "Update an event (Admin only). All fields are optional. Banner upload is optional."
-							},
-							"response": []
-						},
-						{
-							"name": "Delete Event (Admin Only)",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{admin_token}}"
-									}
-								},
-								"method": "DELETE",
-								"header": [],
-								"url": "{{base_url}}/events/{{event_id}}",
-								"description": "Delete an event (Admin only)"
-							},
-							"response": []
-						}
-					],
-					"description": "Admin-only event management operations"
-				},
-				{
-					"name": "Admin Artist Management",
-					"item": [
-						{
-							"name": "Create Artist (Admin Only)",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{admin_token}}"
-									}
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"name\": \"Admin Created Artist\",\n  \"description\": \"Artist created by admin\",\n  \"genre\": \"Rock\"\n}"
-								},
-								"url": "{{base_url}}/artists",
-								"description": "Create a new artist (Admin only)"
-							},
-							"response": []
-						},
-						{
-							"name": "Update Artist (Admin Only)",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{admin_token}}"
-									}
-								},
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"name\": \"Updated Admin Artist\",\n  \"description\": \"Artist updated by admin\"\n}"
-								},
-								"url": "{{base_url}}/artists/{{artist_id}}",
-								"description": "Update an artist (Admin only)"
-							},
-							"response": []
-						},
-						{
-							"name": "Delete Artist (Admin Only)",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{admin_token}}"
-									}
-								},
-								"method": "DELETE",
-								"header": [],
-								"url": "{{base_url}}/artists/{{artist_id}}",
-								"description": "Delete an artist (Admin only)"
-							},
-							"response": []
-						}
-					],
-					"description": "Admin-only artist management operations"
-				},
-				{
-					"name": "Admin User Management",
-					"item": [
-						{
-							"name": "Update Any User (Admin Only)",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{admin_token}}"
-									}
-								},
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "full_name",
-											"value": "Updated by Admin",
-											"type": "text"
-										},
-										{
-											"key": "banner",
-											"type": "file",
-											"src": [],
-											"disabled": true
-										}
-									]
-								},
-								"url": "{{base_url}}/users/{{regular_user_id}}",
-								"description": "Update any user profile (Admin only). All fields are optional. Banner upload is optional."
-							},
-							"response": []
-						},
-						{
-							"name": "Delete Any User (Admin Only)",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{admin_token}}"
-									}
-								},
-								"method": "DELETE",
-								"header": [],
-								"url": "{{base_url}}/users/{{regular_user_id}}",
-								"description": "Delete any user account (Admin only)"
-							},
-							"response": []
-						}
-					],
-					"description": "Admin-only user management operations"
-				}
-			],
-			"description": "Admin-only operations including event, artist, and user management"
-		},
-		{
-			"name": "👤 User Workflows",
-			"item": [
-				{
-					"name": "User Event Operations",
-					"item": [
-						{
-							"name": "Get All Events",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{user_token}}"
-									}
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{base_url}}/events",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"events"
-									]
-								},
-								"description": "View all events (User can read only)"
-							},
-							"response": []
-						},
-						{
-							"name": "Get Event Details",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{user_token}}"
-									}
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/events/{{event_id}}",
-								"description": "View event details (User can read only)"
-							},
-							"response": []
-						}
-					],
-					"description": "User event operations (read-only)"
-				},
-				{
-					"name": "User Message Operations",
-					"item": [
-						{
-							"name": "Create Message",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{user_token}}"
-									}
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"content\": \"Great event! Looking forward to it.\",\n  \"eventId\": {{event_id}}\n}"
-								},
-								"url": "{{base_url}}/messages",
-								"description": "Create a message for an event (User can create)"
-							},
-							"response": []
-						},
-						{
-							"name": "Get Event Messages",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{user_token}}"
-									}
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/events/{{event_id}}/messages",
-								"description": "View messages for an event (User can read)"
-							},
-							"response": []
-						}
-					],
-					"description": "User message operations (create and read only)"
-				},
-				{
-					"name": "User Profile Management",
-					"item": [
-						{
-							"name": "Get My Profile",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{user_token}}"
-									}
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/users/me",
-								"description": "Get current user profile"
-							},
-							"response": []
-						},
-						{
-							"name": "Update My Profile",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{user_token}}"
-									}
-								},
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "full_name",
-											"value": "Updated User Name",
-											"type": "text"
-										},
-										{
-											"key": "banner",
-											"type": "file",
-											"src": [],
-											"disabled": true
-										}
-									]
-								},
-								"url": "{{base_url}}/users/me",
-								"description": "Update own profile. All fields are optional. Banner upload is optional."
-							},
-							"response": []
-						},
-						{
-							"name": "Upload Banner",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{user_token}}"
-									}
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "banner",
-											"type": "file",
-											"src": []
-										}
-									]
-								},
-								"url": "{{base_url}}/users/{{regular_user_id}}/banner",
-								"description": "Upload user banner image"
-							},
-							"response": []
-						}
-					],
-					"description": "User profile management operations"
-				},
-				{
-					"name": "User Bookmark Operations",
-					"item": [
-						{
-							"name": "Add Bookmark",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{user_token}}"
-									}
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"eventId\": {{event_id}}\n}"
-								},
-								"url": "{{base_url}}/bookmarks",
-								"description": "Bookmark an event"
-							},
-							"response": []
-						},
-						{
-							"name": "Get My Bookmarks",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{user_token}}"
-									}
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/bookmarks",
-								"description": "Get user's bookmarked events"
-							},
-							"response": []
-						},
-						{
-							"name": "Remove Bookmark",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{user_token}}"
-									}
-								},
-								"method": "DELETE",
-								"header": [],
-								"url": "{{base_url}}/bookmarks/{{event_id}}",
-								"description": "Remove bookmark from an event"
-							},
-							"response": []
-						}
-					],
-					"description": "User bookmark operations"
-				}
-			],
-			"description": "Regular user operations with limited permissions"
-		},
-		{
-			"name": "Testing Scenarios",
-			"item": [
-				{
-					"name": "Complete User Workflow",
-					"item": [
-						{
-							"name": "1. Register New User",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if (pm.response.code === 201) {",
-											"    const response = pm.response.json();",
-											"    pm.collectionVariables.set('auth_token', response.token.value.release());",
-											"    pm.collectionVariables.set('user_id', response.user.id);",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"full_name\": \"Test User Workflow\",\n  \"email\": \"workflow.test@example.com\",\n  \"password\": \"testpassword123\"\n}"
-								},
-								"url": "{{base_url}}/register"
-							},
-							"response": []
-						},
-						{
-							"name": "2. Update Profile",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{auth_token}}"
-									}
-								},
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"full_name\": \"Updated Test User\"\n}"
-								},
-								"url": "{{base_url}}/users/{{user_id}}"
-							},
-							"response": []
-						},
-						{
-							"name": "3. Reset Password",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"email\": \"workflow.test@example.com\",\n  \"newPassword\": \"resetpassword123\"\n}"
-								},
-								"url": "{{base_url}}/reset-password"
-							},
-							"response": []
-						},
-						{
-							"name": "4. Login with New Password",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if (pm.response.code === 200) {",
-											"    const response = pm.response.json();",
-											"    pm.collectionVariables.set('auth_token', response.token.value.release());",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"email\": \"workflow.test@example.com\",\n  \"password\": \"resetpassword123\"\n}"
-								},
-								"url": "{{base_url}}/login"
-							},
-							"response": []
-						},
-						{
-							"name": "5. Delete Account",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{auth_token}}"
-									}
-								},
-								"method": "DELETE",
-								"header": [],
-								"url": "{{base_url}}/users/{{user_id}}"
-							},
-							"response": []
-						}
-					],
-					"description": "Complete workflow testing all user features in sequence"
-				},
-				{
-					"name": "Complete Event Creation Workflow",
-					"item": [
-						{
-							"name": "1. Register User for Event Creation",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if (pm.response.code === 201) {",
-											"    const response = pm.response.json();",
-											"    pm.collectionVariables.set('auth_token', response.token.value.release());",
-											"    pm.collectionVariables.set('user_id', response.user.id);",
-											"    pm.test('User registered successfully for event creation', () => {",
-											"        pm.expect(response.user).to.have.property('id');",
-											"        pm.expect(response.user).to.have.property('email');",
-											"        pm.expect(response.token).to.have.property('value');",
-											"    });",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"full_name\": \"Event Creator User\",\n  \"email\": \"event.creator@example.com\",\n  \"password\": \"eventpassword123\"\n}"
-								},
-								"url": "{{base_url}}/register",
-								"description": "Step 1: Register a new user account for event creation"
-							},
-							"response": []
-						},
-						{
-							"name": "2. Create Artist for Event",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if (pm.response.code === 201) {",
-											"    const response = pm.response.json();",
-											"    pm.collectionVariables.set('artist_id', response.data.id);",
-											"    pm.test('Artist created successfully', () => {",
-											"        pm.expect(response.data).to.have.property('id');",
-											"        pm.expect(response.data).to.have.property('name');",
-											"        pm.expect(response.data).to.have.property('image');",
-											"    });",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{auth_token}}"
-									}
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "name",
-											"value": "The Rock Stars",
-											"type": "text"
-										},
-										{
-											"key": "image",
-											"type": "file",
-											"src": []
-										}
-									]
-								},
-								"url": "{{base_url}}/artists",
-								"description": "Step 2: Create an artist that will perform at the event"
-							},
-							"response": []
-						},
-						{
-							"name": "3. Create Event with All Details",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if (pm.response.code === 201) {",
-											"    const response = pm.response.json();",
-											"    pm.collectionVariables.set('event_id', response.data.id);",
-											"    pm.test('Event created successfully', () => {",
-											"        pm.expect(response.data).to.have.property('id');",
-											"        pm.expect(response.data).to.have.property('title');",
-											"        pm.expect(response.data).to.have.property('bannerUrl');",
-											"        pm.expect(response.data).to.have.property('type');",
-											"        pm.expect(response.data).to.have.property('subtype');",
-											"        pm.expect(response.data.title).to.equal('Rock Concert 2024');",
-											"    });",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{auth_token}}"
-									}
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "title",
-											"value": "Rock Concert 2024",
-											"type": "text"
-										},
-										{
-											"key": "description",
-											"value": "An electrifying rock concert featuring The Rock Stars band with amazing music and great atmosphere",
-											"type": "text"
-										},
-										{
-											"key": "startDate",
-											"value": "2024-08-15",
-											"type": "text"
-										},
-										{
-											"key": "endDate",
-											"value": "2024-08-15",
-											"type": "text"
-										},
-										{
-											"key": "startHour",
-											"value": "2024-08-15 20:00:00",
-											"type": "text"
-										},
-										{
-											"key": "latitude",
-											"value": "40.7589",
-											"type": "text"
-										},
-										{
-											"key": "longitude",
-											"value": "-73.9851",
-											"type": "text"
-										},
-										{
-											"key": "placeName",
-											"value": "Madison Square Garden",
-											"type": "text"
-										},
-										{
-											"key": "address",
-											"value": "4 Pennsylvania Plaza, New York",
-											"type": "text"
-										},
-										{
-											"key": "city",
-											"value": "New York",
-											"type": "text"
-										},
-										{
-											"key": "type",
-											"value": "concert",
-											"type": "text"
-										},
-										{
-											"key": "subtype",
-											"value": "rock",
-											"type": "text"
-										},
-										{
-											"key": "banner",
-											"type": "file",
-											"src": []
-										}
-									]
-								},
-								"url": "{{base_url}}/events",
-								"description": "Step 3: Create the main event with all required details and banner image"
-							},
-							"response": []
-						},
-						{
-							"name": "4. Verify Event Creation",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if (pm.response.code === 200) {",
-											"    const response = pm.response.json();",
-											"    pm.test('Event retrieved successfully', () => {",
-											"        pm.expect(response.data).to.have.property('id');",
-											"        pm.expect(response.data).to.have.property('title');",
-											"        pm.expect(response.data).to.have.property('bannerUrl');",
-											"        pm.expect(response.data.title).to.equal('Rock Concert 2024');",
-											"        pm.expect(response.data.type).to.equal('concert');",
-											"        pm.expect(response.data.subtype).to.equal('rock');",
-											"    });",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{auth_token}}"
-									}
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/events/{{event_id}}",
-								"description": "Step 4: Verify that the event was created successfully by retrieving it"
-							},
-							"response": []
-						},
-						{
-							"name": "5. Browse All Events",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if (pm.response.code === 200) {",
-											"    const response = pm.response.json();",
-											"    pm.test('Events list retrieved successfully', () => {",
-											"        pm.expect(response.data).to.be.an('array');",
-											"        pm.expect(response.meta).to.have.property('total');",
-											"        pm.expect(response.meta).to.have.property('currentPage');",
-											"    });",
-											"    ",
-											"    // Check if our created event is in the list",
-											"    const createdEventId = pm.collectionVariables.get('event_id');",
-											"    const eventExists = response.data.some(event => event.id == createdEventId);",
-											"    pm.test('Created event appears in events list', () => {",
-											"        pm.expect(eventExists).to.be.true;",
-											"    });",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{auth_token}}"
-									}
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{base_url}}/events?page=1&limit=20&type=concert",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"events"
-									],
-									"query": [
-										{
-											"key": "page",
-											"value": "1"
-										},
-										{
-											"key": "limit",
-											"value": "20"
-										},
-										{
-											"key": "type",
-											"value": "concert"
-										}
-									]
-								},
-								"description": "Step 5: Browse all events to see the created event in the list"
-							},
-							"response": []
-						},
-						{
-							"name": "6. Update Event Details",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if (pm.response.code === 200) {",
-											"    const response = pm.response.json();",
-											"    pm.test('Event updated successfully', () => {",
-											"        pm.expect(response.data).to.have.property('id');",
-											"        pm.expect(response.data).to.have.property('title');",
-											"        pm.expect(response.data.title).to.include('Updated');",
-											"    });",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": {
-										"token": "{{auth_token}}"
-									}
-								},
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"title\": \"Rock Concert 2024 - Updated\",\n  \"description\": \"An electrifying rock concert featuring The Rock Stars band with amazing music, great atmosphere, and special guest appearances!\"\n}"
-								},
-								"url": "{{base_url}}/events/{{event_id}}",
-								"description": "Step 6: Update event details to improve the description and title"
-							},
-							"response": []
-						}
-					],
-					"description": "Complete workflow demonstrating how a basic user would create an event from start to finish, including user registration, artist creation, event creation, verification, and updates"
-				}
-			],
-			"description": "Pre-configured testing scenarios"
-		}
-	],
-	"auth": {
-		"type": "bearer",
-		"bearer": {
-			"token": "{{auth_token}}"
-		}
-	},
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:3333",
-			"type": "string"
-		},
-		{
-			"key": "auth_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "user_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "artist_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "event_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "reset_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "message_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "oauth_code",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "oauth_state",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "admin_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "user_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "admin_user_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "regular_user_id",
-			"value": "",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "9ec2cc3e-6a79-4d07-a179-2c7fe7cdaa6f",
+    "name": "Spotlight API - Complete Collection",
+    "description": "Complete collection for testing all features in Spotlight API including Authentication (with OAuth support for Google, Facebook, GitHub, Twitter), User Management, Events, Artists, Messages, and comprehensive testing scenarios",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+    "_exporter_id": "18509415"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login as Admin (Seeded)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('admin_token', response.token.value.release());",
+                  "    pm.collectionVariables.set('admin_user_id', response.user.id);",
+                  "    pm.test('Admin login successful', () => {",
+                  "        pm.expect(response.user).to.have.property('id');",
+                  "        pm.expect(response.user).to.have.property('email');",
+                  "        pm.expect(response.user.email).to.eql('admin@spotlight.com');",
+                  "        pm.expect(response.token).to.have.property('value');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@spotlight.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": "{{base_url}}/login",
+            "description": "Login with seeded admin account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login as Regular User (Seeded)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('user_token', response.token.value.release());",
+                  "    pm.collectionVariables.set('regular_user_id', response.user.id);",
+                  "    pm.test('User login successful', () => {",
+                  "        pm.expect(response.user).to.have.property('id');",
+                  "        pm.expect(response.user).to.have.property('email');",
+                  "        pm.expect(response.user.email).to.eql('user@spotlight.com');",
+                  "        pm.expect(response.token).to.have.property('value');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@spotlight.com\",\n  \"password\": \"user123\"\n}"
+            },
+            "url": "{{base_url}}/login",
+            "description": "Login with seeded regular user account"
+          },
+          "response": []
+        },
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', response.token.value.release());",
+                  "    pm.collectionVariables.set('user_id', response.user.id);",
+                  "    pm.test('Registration successful', () => {",
+                  "        pm.expect(response.user).to.have.property('id');",
+                  "        pm.expect(response.user).to.have.property('email');",
+                  "        pm.expect(response.token).to.have.property('value');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{base_url}}/register",
+            "description": "Register a new user account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', response.token.value.release());",
+                  "    pm.collectionVariables.set('user_id', response.user.id);",
+                  "    pm.test('Login successful', () => {",
+                  "        pm.expect(response.user).to.have.property('id');",
+                  "        pm.expect(response.user).to.have.property('email');",
+                  "        pm.expect(response.token).to.have.property('value');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{base_url}}/login",
+            "description": "Login with existing user credentials"
+          },
+          "response": []
+        },
+        {
+          "name": "OAuth Google Redirect",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/oauth/google",
+            "description": "Redirect to Google OAuth authorization page"
+          },
+          "response": []
+        },
+        {
+          "name": "OAuth Facebook Redirect - Invalid Provider",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/oauth/facebook",
+            "description": "Redirect to Facebook OAuth authorization page"
+          },
+          "response": []
+        },
+        {
+          "name": "OAuth Google Callback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', response.token.value.release());",
+                  "    pm.collectionVariables.set('user_id', response.user.id);",
+                  "    pm.test('OAuth login successful', () => {",
+                  "        pm.expect(response.user).to.have.property('id');",
+                  "        pm.expect(response.user).to.have.property('email');",
+                  "        pm.expect(response.token).to.have.property('value');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/oauth/google/callback?code={{oauth_code}}&state={{oauth_state}}",
+              "host": ["{{base_url}}"],
+              "path": ["oauth", "google", "callback"],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "{{oauth_code}}",
+                  "description": "Authorization code from Google"
+                },
+                {
+                  "key": "state",
+                  "value": "{{oauth_state}}",
+                  "description": "State parameter for security"
+                }
+              ]
+            },
+            "description": "Handle Google OAuth callback with authorization code"
+          },
+          "response": []
+        },
+        {
+          "name": "OAuth Facebook Callback - Invalid Provider",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', response.token.value.release());",
+                  "    pm.collectionVariables.set('user_id', response.user.id);",
+                  "    pm.test('OAuth login successful', () => {",
+                  "        pm.expect(response.user).to.have.property('id');",
+                  "        pm.expect(response.user).to.have.property('email');",
+                  "        pm.expect(response.token).to.have.property('value');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/oauth/facebook/callback?code={{oauth_code}}&state={{oauth_state}}",
+              "host": ["{{base_url}}"],
+              "path": ["oauth", "facebook", "callback"],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "{{oauth_code}}",
+                  "description": "Authorization code from Facebook"
+                },
+                {
+                  "key": "state",
+                  "value": "{{oauth_state}}",
+                  "description": "State parameter for security"
+                }
+              ]
+            },
+            "description": "Handle Facebook OAuth callback with authorization code"
+          },
+          "response": []
+        },
+        {
+          "name": "OAuth Google Unlink",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/oauth/google/unlink",
+            "description": "Unlink Google OAuth account from current user"
+          },
+          "response": []
+        },
+        {
+          "name": "OAuth Facebook Unlink - Invalid Provider",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/oauth/facebook/unlink",
+            "description": "Unlink Facebook OAuth account from current user"
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password - Valid Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 302 (redirect)', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                  "});",
+                  "",
+                  "pm.test('Response indicates success or redirect', () => {",
+                  "    // For successful password reset request, we expect either:",
+                  "    // - 302 redirect (if using session flash messages)",
+                  "    // - 200 with success message",
+                  "    if (pm.response.code === 200) {",
+                  "        const response = pm.response.json();",
+                  "        pm.expect(response).to.have.property('message');",
+                  "    }",
+                  "});",
+                  "",
+                  "console.log('Forgot password request sent for valid email');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\"\n}"
+            },
+            "url": "{{base_url}}/forgot-password",
+            "description": "Send password reset email to a valid registered email address"
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password - Invalid Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 302 (redirect)', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                  "});",
+                  "",
+                  "pm.test('Response handles invalid email gracefully', () => {",
+                  "    // The endpoint should handle invalid emails gracefully",
+                  "    // without revealing whether the email exists or not",
+                  "    if (pm.response.code === 200) {",
+                  "        const response = pm.response.json();",
+                  "        pm.expect(response).to.have.property('message');",
+                  "    }",
+                  "});",
+                  "",
+                  "console.log('Forgot password request sent for invalid email');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nonexistent@example.com\"\n}"
+            },
+            "url": "{{base_url}}/forgot-password",
+            "description": "Test forgot password with non-existent email address"
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password - Render Form",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/forgot-password",
+            "description": "Render the forgot password form (if using server-side rendering)"
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 302', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                  "});",
+                  "",
+                  "pm.test('Password reset processed', () => {",
+                  "    if (pm.response.code === 200) {",
+                  "        const response = pm.response.json();",
+                  "        pm.expect(response).to.have.property('message');",
+                  "    }",
+                  "});",
+                  "",
+                  "console.log('Password reset request processed');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"newPassword\": \"newpassword123\",\n  \"token\": \"{{reset_token}}\"\n}"
+            },
+            "url": "{{base_url}}/reset-password",
+            "description": "Reset password using token from email (replace {{reset_token}} with actual token from email)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints for user registration, login, and OAuth"
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Update User Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "full_name",
+                  "value": "John Updated Doe",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "john.updated@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "newpassword123",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "banner",
+                  "type": "file",
+                  "src": [],
+                  "disabled": true
+                }
+              ]
+            },
+            "url": "{{base_url}}/users/{{user_id}}",
+            "description": "Update user profile information with optional banner image upload. You can enable/disable fields as needed."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile (JSON)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"John Updated Doe\",\n  \"email\": \"john.updated@example.com\"\n}"
+            },
+            "url": "{{base_url}}/users/{{user_id}}",
+            "description": "Update user profile information (JSON format, without file upload)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('User profile retrieved successfully', () => {",
+                  "        pm.expect(response.data).to.have.property('id');",
+                  "        pm.expect(response.data).to.have.property('email');",
+                  "        pm.expect(response.data).to.have.property('full_name');",
+                  "        pm.expect(response.message).to.equal('User retrieved successfully');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/users/me",
+            "description": "Get the authenticated user's profile information"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{base_url}}/users/me"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User retrieved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"full_name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"bannerUrl\": \"https://unavatar.io/john.doe@example.com?fallback=https://avatar.vercel.sh/John Doe?size=128\",\n    \"role\": \"user\",\n    \"createdAt\": \"2024-01-01T00:00:00.000Z\",\n    \"updatedAt\": \"2024-01-01T00:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update User Profile (Current User)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "full_name",
+                  "value": "John Current User",
+                  "type": "text"
+                },
+                {
+                  "key": "banner",
+                  "type": "file",
+                  "src": [],
+                  "disabled": true
+                }
+              ]
+            },
+            "url": "{{base_url}}/users/me",
+            "description": "Update current authenticated user's profile. All fields are optional. Banner upload is optional."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload User Banner",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "banner",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": "{{base_url}}/users/{{user_id}}/banner",
+            "description": "Upload a banner image for the user profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('auth_token', '');",
+                  "    pm.collectionVariables.set('user_id', '');",
+                  "    pm.test('User deleted successfully', () => {",
+                  "        pm.expect(pm.response.json().message).to.include('deleted');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/users/{{user_id}}",
+            "description": "Delete user account (requires authentication). This will also revoke all access tokens."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Current User Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('auth_token', '');",
+                  "    pm.collectionVariables.set('user_id', '');",
+                  "    pm.test('User deleted successfully', () => {",
+                  "        pm.expect(pm.response.json().message).to.include('deleted');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/users/me",
+            "description": "Delete current authenticated user's account"
+          },
+          "response": []
+        }
+      ],
+      "description": "User profile management endpoints"
+    },
+    {
+      "name": "Password Management",
+      "item": [
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"newPassword\": \"newpassword123\"\n}"
+            },
+            "url": "{{base_url}}/reset-password",
+            "description": "Reset user password using email address"
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password (Authenticated)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"newpassword123\"\n}"
+            },
+            "url": "{{base_url}}/users/me",
+            "description": "Change password for authenticated user"
+          },
+          "response": []
+        }
+      ],
+      "description": "Password management endpoints"
+    },
+    {
+      "name": "Artists Management",
+      "item": [
+        {
+          "name": "Create Artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('artist_id', response.data.id);",
+                  "    pm.test('Artist created successfully', () => {",
+                  "        pm.expect(response.data).to.have.property('id');",
+                  "        pm.expect(response.data).to.have.property('name');",
+                  "        pm.expect(response.data).to.have.property('image');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Taylor Swift",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": "{{base_url}}/artists",
+            "description": "Create a new artist with name and image"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Artists",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/artists?page=1&limit=10&name=Taylor",
+              "host": ["{{base_url}}"],
+              "path": ["artists"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of artists per page (max 100)"
+                },
+                {
+                  "key": "name",
+                  "value": "Taylor",
+                  "description": "Filter by artist name (partial match)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieve a paginated list of artists with optional filtering by name."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Artist",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/artists/{{artist_id}}",
+            "description": "Retrieve detailed information about a specific artist by its ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Artist",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Taylor Swift (Updated)",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "disabled": true
+                }
+              ]
+            },
+            "url": "{{base_url}}/artists/{{artist_id}}",
+            "description": "Update an existing artist. Image upload is optional."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Artist (JSON)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Taylor Swift (JSON Update)\"\n}"
+            },
+            "url": "{{base_url}}/artists/{{artist_id}}",
+            "description": "Update artist name only (JSON format, without file upload)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Artist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('artist_id', '');",
+                  "    pm.test('Artist deleted successfully', () => {",
+                  "        pm.expect(pm.response.json().message).to.include('deleted');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/artists/{{artist_id}}",
+            "description": "Delete an artist by ID"
+          },
+          "response": []
+        }
+      ],
+      "description": "Artist management endpoints for creating, updating, and deleting artists"
+    },
+    {
+      "name": "Events Management",
+      "item": [
+        {
+          "name": "Create Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('event_id', response.data.id);",
+                  "    pm.test('Event created successfully', () => {",
+                  "        pm.expect(response.data).to.have.property('id');",
+                  "        pm.expect(response.data).to.have.property('title');",
+                  "        pm.expect(response.data).to.have.property('bannerUrl');",
+                  "        pm.expect(response.data).to.have.property('type');",
+                  "        pm.expect(response.data).to.have.property('subtype');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Summer Music Festival 2024",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "An amazing outdoor music festival featuring top artists from around the world",
+                  "type": "text"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2024-07-15",
+                  "type": "text"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-07-17",
+                  "type": "text"
+                },
+                {
+                  "key": "startHour",
+                  "value": "2024-07-15 18:00:00",
+                  "type": "text"
+                },
+                {
+                  "key": "latitude",
+                  "value": "40.7128",
+                  "type": "text"
+                },
+                {
+                  "key": "longitude",
+                  "value": "-74.0060",
+                  "type": "text"
+                },
+                {
+                  "key": "placeName",
+                  "value": "Central Park",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "1234 Main Street, Central Park",
+                  "type": "text"
+                },
+                {
+                  "key": "city",
+                  "value": "New York",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "festival",
+                  "type": "text"
+                },
+                {
+                  "key": "subtype",
+                  "value": "rock",
+                  "type": "text"
+                },
+                {
+                  "key": "banner",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "artistIds",
+                  "value": "[1, 2]",
+                  "description": "Array of artist IDs to associate with the event (optional)",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": "{{base_url}}/events",
+            "description": "Create a new event with all required information and banner image. All fields are required except description and openHour."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Events",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events?page=1&limit=10&type=festival&city=New York",
+              "host": ["{{base_url}}"],
+              "path": ["events"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of events per page (max 100)"
+                },
+                {
+                  "key": "type",
+                  "value": "festival",
+                  "description": "Filter by event type (concert, festival, exhibition, conference)",
+                  "disabled": true
+                },
+                {
+                  "key": "subtype",
+                  "value": "rock",
+                  "description": "Filter by event subtype (rock, hiphop, jazz, techno, classical)",
+                  "disabled": true
+                },
+                {
+                  "key": "city",
+                  "value": "New York",
+                  "description": "Filter by city name",
+                  "disabled": true
+                },
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01",
+                  "description": "Filter events starting from this date (YYYY-MM-DD)",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31",
+                  "description": "Filter events ending before this date (YYYY-MM-DD)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieve a paginated list of events with optional filtering by type, subtype, city, and date range."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Event",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/events/{{event_id}}",
+            "description": "Retrieve detailed information about a specific event by its ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Summer Music Festival 2024 (Updated)",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "An updated description for the amazing outdoor music festival",
+                  "type": "text"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2024-07-16",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-07-18",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "startHour",
+                  "value": "2024-07-16 19:00:00",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "latitude",
+                  "value": "40.7589",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "longitude",
+                  "value": "-73.9851",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "placeName",
+                  "value": "Times Square",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "address",
+                  "value": "1 Times Square, Manhattan",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "city",
+                  "value": "New York",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "concert",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "subtype",
+                  "value": "jazz",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "banner",
+                  "type": "file",
+                  "src": [],
+                  "disabled": true
+                },
+                {
+                  "key": "artistIds",
+                  "value": "[1, 3]",
+                  "description": "Array of artist IDs to associate with the event (optional, replaces existing associations)",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": "{{base_url}}/events/{{event_id}}",
+            "description": "Update an existing event. All fields are optional. You can enable/disable fields as needed. Banner upload is optional."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Event (JSON)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Summer Music Festival 2024 (JSON Update)\",\n  \"description\": \"Updated via JSON without file upload\",\n  \"type\": \"concert\",\n  \"subtype\": \"jazz\"\n}"
+            },
+            "url": "{{base_url}}/events/{{event_id}}",
+            "description": "Update event information (JSON format, without file upload). All fields are optional."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('event_id', '');",
+                  "    pm.test('Event deleted successfully', () => {",
+                  "        pm.expect(pm.response.json().message).to.include('deleted');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/events/{{event_id}}",
+            "description": "Delete an event by its ID. This will also delete the associated banner image."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event Artists",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/events/{{event_id}}/artists",
+            "description": "Retrieve all artists associated with a specific event."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Artists to Event",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"artistIds\": [1, 2]\n}"
+            },
+            "url": "{{base_url}}/events/{{event_id}}/artists",
+            "description": "Add one or more artists to an existing event. Artists that are already associated will be ignored."
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Artists from Event",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"artistIds\": [1]\n}"
+            },
+            "url": "{{base_url}}/events/{{event_id}}/artists",
+            "description": "Remove one or more artists from an existing event. Artists that are not associated will be ignored."
+          },
+          "response": []
+        },
+        {
+          "name": "Scrape Events Toulouse (Admin Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/scrap/events/toulouse",
+            "description": "Scrape events from Toulouse sources. This endpoint is restricted to admin users only and is used for testing the scraping functionality."
+          },
+          "response": []
+        }
+      ],
+      "description": "Event management endpoints for creating, reading, updating, and deleting events, including artist associations"
+    },
+    {
+      "name": "Bookmarks Management",
+      "item": [
+        {
+          "name": "Add Bookmark",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('Bookmark added successfully', () => {",
+                  "        pm.expect(response).to.have.property('message');",
+                  "        pm.expect(response).to.have.property('data');",
+                  "        pm.expect(response.data).to.have.property('isFavorite', true);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": {{event_id}}\n}"
+            },
+            "url": "{{base_url}}/bookmarks",
+            "description": "Add an event to user's bookmarks"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Bookmarks",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('Bookmarks retrieved successfully', () => {",
+                  "        pm.expect(response).to.have.property('message');",
+                  "        pm.expect(response).to.have.property('data');",
+                  "        pm.expect(response.data).to.have.property('data');",
+                  "        pm.expect(response.data.data).to.be.an('array');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookmarks?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["bookmarks"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Number of bookmarks per page"
+                }
+              ]
+            },
+            "description": "Get all bookmarked events for the authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Check Bookmark Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('Bookmark status retrieved successfully', () => {",
+                  "        pm.expect(response).to.have.property('message');",
+                  "        pm.expect(response).to.have.property('data');",
+                  "        pm.expect(response.data).to.have.property('eventId');",
+                  "        pm.expect(response.data).to.have.property('isBookmarked');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/bookmarks/check/{{event_id}}",
+            "description": "Check if an event is bookmarked by the user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Bookmark Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('Bookmark statistics retrieved successfully', () => {",
+                  "        pm.expect(response).to.have.property('message');",
+                  "        pm.expect(response).to.have.property('data');",
+                  "        pm.expect(response.data).to.have.property('totalBookmarks');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/bookmarks/stats",
+            "description": "Get bookmark statistics for the authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Bookmark",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('Bookmark removed successfully', () => {",
+                  "        pm.expect(response).to.have.property('message');",
+                  "        pm.expect(response.message).to.include('removed successfully');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/bookmarks/{{event_id}}",
+            "description": "Remove an event from user's bookmarks"
+          },
+          "response": []
+        }
+      ],
+      "description": "Bookmark management endpoints for adding, removing, and viewing user's bookmarked events"
+    },
+    {
+      "name": "Messages Management",
+      "item": [
+        {
+          "name": "Create Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('message_id', response.data.id);",
+                  "    pm.test('Message created successfully', () => {",
+                  "        pm.expect(response.data).to.have.property('id');",
+                  "        pm.expect(response.data).to.have.property('content');",
+                  "        pm.expect(response.data).to.have.property('eventId');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is a test message for the event\",\n  \"eventId\": {{event_id}}\n}"
+            },
+            "url": "{{base_url}}/messages",
+            "description": "Create a new message for an event"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event Messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test('Messages retrieved successfully', () => {",
+                  "        pm.expect(response).to.have.property('data');",
+                  "        pm.expect(response.data).to.be.an('array');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/messages?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["events", "{{event_id}}", "messages"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of messages per page"
+                }
+              ]
+            },
+            "description": "Get all messages for a specific event with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/messages/{{message_id}}",
+            "description": "Get details of a specific message"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is an updated message content\"\n}"
+            },
+            "url": "{{base_url}}/messages/{{message_id}}",
+            "description": "Update an existing message (only the author can update)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Message (PATCH)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Partially updated message content\"\n}"
+            },
+            "url": "{{base_url}}/messages/{{message_id}}",
+            "description": "Partially update an existing message (only the author can update)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": {
+                "token": "{{auth_token}}"
+              }
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": "{{base_url}}/messages/{{message_id}}",
+            "description": "Delete a message (only the author can delete)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Message management endpoints for creating, reading, updating, and deleting messages within events"
+    },
+    {
+      "name": "🔐 Admin Workflows",
+      "item": [
+        {
+          "name": "Admin Event Management",
+          "item": [
+            {
+              "name": "Create Event (Admin Only)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{admin_token}}"
+                  }
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "Admin Created Event",
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "value": "Event created by admin user",
+                      "type": "text"
+                    },
+                    {
+                      "key": "startDate",
+                      "value": "2024-08-15",
+                      "type": "text"
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "2024-08-15",
+                      "type": "text"
+                    },
+                    {
+                      "key": "startHour",
+                      "value": "2024-08-15 20:00:00",
+                      "type": "text"
+                    },
+                    {
+                      "key": "latitude",
+                      "value": "43.6047",
+                      "type": "text"
+                    },
+                    {
+                      "key": "longitude",
+                      "value": "1.4442",
+                      "type": "text"
+                    },
+                    {
+                      "key": "placeName",
+                      "value": "Toulouse Arena",
+                      "type": "text"
+                    },
+                    {
+                      "key": "address",
+                      "value": "123 Admin Street",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city",
+                      "value": "Toulouse",
+                      "type": "text"
+                    },
+                    {
+                      "key": "type",
+                      "value": "concert",
+                      "type": "text"
+                    },
+                    {
+                      "key": "subtype",
+                      "value": "rock",
+                      "type": "text"
+                    },
+                    {
+                      "key": "banner",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": "{{base_url}}/events",
+                "description": "Create a new event (Admin only)"
+              },
+              "response": []
+            },
+            {
+              "name": "Update Event (Admin Only)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{admin_token}}"
+                  }
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "Updated Admin Event",
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "value": "Event updated by admin",
+                      "type": "text"
+                    },
+                    {
+                      "key": "banner",
+                      "type": "file",
+                      "src": [],
+                      "disabled": true
+                    }
+                  ]
+                },
+                "url": "{{base_url}}/events/{{event_id}}",
+                "description": "Update an event (Admin only). All fields are optional. Banner upload is optional."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Event (Admin Only)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{admin_token}}"
+                  }
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/events/{{event_id}}",
+                "description": "Delete an event (Admin only)"
+              },
+              "response": []
+            }
+          ],
+          "description": "Admin-only event management operations"
+        },
+        {
+          "name": "Admin Artist Management",
+          "item": [
+            {
+              "name": "Create Artist (Admin Only)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{admin_token}}"
+                  }
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Admin Created Artist\",\n  \"description\": \"Artist created by admin\",\n  \"genre\": \"Rock\"\n}"
+                },
+                "url": "{{base_url}}/artists",
+                "description": "Create a new artist (Admin only)"
+              },
+              "response": []
+            },
+            {
+              "name": "Update Artist (Admin Only)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{admin_token}}"
+                  }
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Admin Artist\",\n  \"description\": \"Artist updated by admin\"\n}"
+                },
+                "url": "{{base_url}}/artists/{{artist_id}}",
+                "description": "Update an artist (Admin only)"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Artist (Admin Only)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{admin_token}}"
+                  }
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/artists/{{artist_id}}",
+                "description": "Delete an artist (Admin only)"
+              },
+              "response": []
+            }
+          ],
+          "description": "Admin-only artist management operations"
+        },
+        {
+          "name": "Admin User Management",
+          "item": [
+            {
+              "name": "Update Any User (Admin Only)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{admin_token}}"
+                  }
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "full_name",
+                      "value": "Updated by Admin",
+                      "type": "text"
+                    },
+                    {
+                      "key": "banner",
+                      "type": "file",
+                      "src": [],
+                      "disabled": true
+                    }
+                  ]
+                },
+                "url": "{{base_url}}/users/{{regular_user_id}}",
+                "description": "Update any user profile (Admin only). All fields are optional. Banner upload is optional."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Any User (Admin Only)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{admin_token}}"
+                  }
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/users/{{regular_user_id}}",
+                "description": "Delete any user account (Admin only)"
+              },
+              "response": []
+            }
+          ],
+          "description": "Admin-only user management operations"
+        }
+      ],
+      "description": "Admin-only operations including event, artist, and user management"
+    },
+    {
+      "name": "👤 User Workflows",
+      "item": [
+        {
+          "name": "User Event Operations",
+          "item": [
+            {
+              "name": "Get All Events",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{user_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/events",
+                  "host": ["{{base_url}}"],
+                  "path": ["events"]
+                },
+                "description": "View all events (User can read only)"
+              },
+              "response": []
+            },
+            {
+              "name": "Get Event Details",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{user_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/events/{{event_id}}",
+                "description": "View event details (User can read only)"
+              },
+              "response": []
+            }
+          ],
+          "description": "User event operations (read-only)"
+        },
+        {
+          "name": "User Message Operations",
+          "item": [
+            {
+              "name": "Create Message",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{user_token}}"
+                  }
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Great event! Looking forward to it.\",\n  \"eventId\": {{event_id}}\n}"
+                },
+                "url": "{{base_url}}/messages",
+                "description": "Create a message for an event (User can create)"
+              },
+              "response": []
+            },
+            {
+              "name": "Get Event Messages",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{user_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/events/{{event_id}}/messages",
+                "description": "View messages for an event (User can read)"
+              },
+              "response": []
+            }
+          ],
+          "description": "User message operations (create and read only)"
+        },
+        {
+          "name": "User Profile Management",
+          "item": [
+            {
+              "name": "Get My Profile",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{user_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/users/me",
+                "description": "Get current user profile"
+              },
+              "response": []
+            },
+            {
+              "name": "Update My Profile",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{user_token}}"
+                  }
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "full_name",
+                      "value": "Updated User Name",
+                      "type": "text"
+                    },
+                    {
+                      "key": "banner",
+                      "type": "file",
+                      "src": [],
+                      "disabled": true
+                    }
+                  ]
+                },
+                "url": "{{base_url}}/users/me",
+                "description": "Update own profile. All fields are optional. Banner upload is optional."
+              },
+              "response": []
+            },
+            {
+              "name": "Upload Banner",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{user_token}}"
+                  }
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "banner",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": "{{base_url}}/users/{{regular_user_id}}/banner",
+                "description": "Upload user banner image"
+              },
+              "response": []
+            }
+          ],
+          "description": "User profile management operations"
+        },
+        {
+          "name": "User Bookmark Operations",
+          "item": [
+            {
+              "name": "Add Bookmark",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{user_token}}"
+                  }
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"eventId\": {{event_id}}\n}"
+                },
+                "url": "{{base_url}}/bookmarks",
+                "description": "Bookmark an event"
+              },
+              "response": []
+            },
+            {
+              "name": "Get My Bookmarks",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{user_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/bookmarks",
+                "description": "Get user's bookmarked events"
+              },
+              "response": []
+            },
+            {
+              "name": "Remove Bookmark",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{user_token}}"
+                  }
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/bookmarks/{{event_id}}",
+                "description": "Remove bookmark from an event"
+              },
+              "response": []
+            }
+          ],
+          "description": "User bookmark operations"
+        }
+      ],
+      "description": "Regular user operations with limited permissions"
+    },
+    {
+      "name": "Testing Scenarios",
+      "item": [
+        {
+          "name": "Complete User Workflow",
+          "item": [
+            {
+              "name": "1. Register New User",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    pm.collectionVariables.set('auth_token', response.token.value.release());",
+                      "    pm.collectionVariables.set('user_id', response.user.id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"Test User Workflow\",\n  \"email\": \"workflow.test@example.com\",\n  \"password\": \"testpassword123\"\n}"
+                },
+                "url": "{{base_url}}/register"
+              },
+              "response": []
+            },
+            {
+              "name": "2. Update Profile",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{auth_token}}"
+                  }
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"Updated Test User\"\n}"
+                },
+                "url": "{{base_url}}/users/{{user_id}}"
+              },
+              "response": []
+            },
+            {
+              "name": "3. Reset Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"workflow.test@example.com\",\n  \"newPassword\": \"resetpassword123\"\n}"
+                },
+                "url": "{{base_url}}/reset-password"
+              },
+              "response": []
+            },
+            {
+              "name": "4. Login with New Password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    pm.collectionVariables.set('auth_token', response.token.value.release());",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"workflow.test@example.com\",\n  \"password\": \"resetpassword123\"\n}"
+                },
+                "url": "{{base_url}}/login"
+              },
+              "response": []
+            },
+            {
+              "name": "5. Delete Account",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{auth_token}}"
+                  }
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": "{{base_url}}/users/{{user_id}}"
+              },
+              "response": []
+            }
+          ],
+          "description": "Complete workflow testing all user features in sequence"
+        },
+        {
+          "name": "Complete Event Creation Workflow",
+          "item": [
+            {
+              "name": "1. Register User for Event Creation",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    pm.collectionVariables.set('auth_token', response.token.value.release());",
+                      "    pm.collectionVariables.set('user_id', response.user.id);",
+                      "    pm.test('User registered successfully for event creation', () => {",
+                      "        pm.expect(response.user).to.have.property('id');",
+                      "        pm.expect(response.user).to.have.property('email');",
+                      "        pm.expect(response.token).to.have.property('value');",
+                      "    });",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"Event Creator User\",\n  \"email\": \"event.creator@example.com\",\n  \"password\": \"eventpassword123\"\n}"
+                },
+                "url": "{{base_url}}/register",
+                "description": "Step 1: Register a new user account for event creation"
+              },
+              "response": []
+            },
+            {
+              "name": "2. Create Artist for Event",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    pm.collectionVariables.set('artist_id', response.data.id);",
+                      "    pm.test('Artist created successfully', () => {",
+                      "        pm.expect(response.data).to.have.property('id');",
+                      "        pm.expect(response.data).to.have.property('name');",
+                      "        pm.expect(response.data).to.have.property('image');",
+                      "    });",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{auth_token}}"
+                  }
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "The Rock Stars",
+                      "type": "text"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": "{{base_url}}/artists",
+                "description": "Step 2: Create an artist that will perform at the event"
+              },
+              "response": []
+            },
+            {
+              "name": "3. Create Event with All Details",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    pm.collectionVariables.set('event_id', response.data.id);",
+                      "    pm.test('Event created successfully', () => {",
+                      "        pm.expect(response.data).to.have.property('id');",
+                      "        pm.expect(response.data).to.have.property('title');",
+                      "        pm.expect(response.data).to.have.property('bannerUrl');",
+                      "        pm.expect(response.data).to.have.property('type');",
+                      "        pm.expect(response.data).to.have.property('subtype');",
+                      "        pm.expect(response.data.title).to.equal('Rock Concert 2024');",
+                      "    });",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{auth_token}}"
+                  }
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "Rock Concert 2024",
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "value": "An electrifying rock concert featuring The Rock Stars band with amazing music and great atmosphere",
+                      "type": "text"
+                    },
+                    {
+                      "key": "startDate",
+                      "value": "2024-08-15",
+                      "type": "text"
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "2024-08-15",
+                      "type": "text"
+                    },
+                    {
+                      "key": "startHour",
+                      "value": "2024-08-15 20:00:00",
+                      "type": "text"
+                    },
+                    {
+                      "key": "latitude",
+                      "value": "40.7589",
+                      "type": "text"
+                    },
+                    {
+                      "key": "longitude",
+                      "value": "-73.9851",
+                      "type": "text"
+                    },
+                    {
+                      "key": "placeName",
+                      "value": "Madison Square Garden",
+                      "type": "text"
+                    },
+                    {
+                      "key": "address",
+                      "value": "4 Pennsylvania Plaza, New York",
+                      "type": "text"
+                    },
+                    {
+                      "key": "city",
+                      "value": "New York",
+                      "type": "text"
+                    },
+                    {
+                      "key": "type",
+                      "value": "concert",
+                      "type": "text"
+                    },
+                    {
+                      "key": "subtype",
+                      "value": "rock",
+                      "type": "text"
+                    },
+                    {
+                      "key": "banner",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": "{{base_url}}/events",
+                "description": "Step 3: Create the main event with all required details and banner image"
+              },
+              "response": []
+            },
+            {
+              "name": "4. Verify Event Creation",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    pm.test('Event retrieved successfully', () => {",
+                      "        pm.expect(response.data).to.have.property('id');",
+                      "        pm.expect(response.data).to.have.property('title');",
+                      "        pm.expect(response.data).to.have.property('bannerUrl');",
+                      "        pm.expect(response.data.title).to.equal('Rock Concert 2024');",
+                      "        pm.expect(response.data.type).to.equal('concert');",
+                      "        pm.expect(response.data.subtype).to.equal('rock');",
+                      "    });",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{auth_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": "{{base_url}}/events/{{event_id}}",
+                "description": "Step 4: Verify that the event was created successfully by retrieving it"
+              },
+              "response": []
+            },
+            {
+              "name": "5. Browse All Events",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    pm.test('Events list retrieved successfully', () => {",
+                      "        pm.expect(response.data).to.be.an('array');",
+                      "        pm.expect(response.meta).to.have.property('total');",
+                      "        pm.expect(response.meta).to.have.property('currentPage');",
+                      "    });",
+                      "    ",
+                      "    // Check if our created event is in the list",
+                      "    const createdEventId = pm.collectionVariables.get('event_id');",
+                      "    const eventExists = response.data.some(event => event.id == createdEventId);",
+                      "    pm.test('Created event appears in events list', () => {",
+                      "        pm.expect(eventExists).to.be.true;",
+                      "    });",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{auth_token}}"
+                  }
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/events?page=1&limit=20&type=concert",
+                  "host": ["{{base_url}}"],
+                  "path": ["events"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "type",
+                      "value": "concert"
+                    }
+                  ]
+                },
+                "description": "Step 5: Browse all events to see the created event in the list"
+              },
+              "response": []
+            },
+            {
+              "name": "6. Update Event Details",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    pm.test('Event updated successfully', () => {",
+                      "        pm.expect(response.data).to.have.property('id');",
+                      "        pm.expect(response.data).to.have.property('title');",
+                      "        pm.expect(response.data.title).to.include('Updated');",
+                      "    });",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": {
+                    "token": "{{auth_token}}"
+                  }
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Rock Concert 2024 - Updated\",\n  \"description\": \"An electrifying rock concert featuring The Rock Stars band with amazing music, great atmosphere, and special guest appearances!\"\n}"
+                },
+                "url": "{{base_url}}/events/{{event_id}}",
+                "description": "Step 6: Update event details to improve the description and title"
+              },
+              "response": []
+            }
+          ],
+          "description": "Complete workflow demonstrating how a basic user would create an event from start to finish, including user registration, artist creation, event creation, verification, and updates"
+        }
+      ],
+      "description": "Pre-configured testing scenarios"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": {
+      "token": "{{auth_token}}"
+    }
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3333",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "artist_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "event_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reset_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "message_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "oauth_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "oauth_state",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "regular_user_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
 }

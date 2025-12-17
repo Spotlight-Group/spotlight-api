@@ -18,7 +18,7 @@ export default class LoginController {
    * @responseBody 400 - {"message": "You are already logged in"} - Already logged in
    * @responseBody 401 - {"message": "Invalid credentials"} - Invalid credentials
    */
-  async handle({ request, response, auth, logger }: HttpContext) {
+  async handle({ request, response, auth, logger }: HttpContext): Promise<void> {
     const rawEmail = String(request.input('email') || '').toLowerCase()
     const emailMasked = rawEmail ? rawEmail.replace(/(.{2}).+(@.+)/, '$1***$2') : undefined
     logger.info({ event: 'user.login.attempt', emailMasked })

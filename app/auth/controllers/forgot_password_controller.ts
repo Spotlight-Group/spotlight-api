@@ -16,7 +16,7 @@ export default class ForgotPasswordController {
    * @responseBody 404 - {"message": "User with this email address not found"} - User not found
    * @responseBody 500 - {"message": "An error occurred while sending the password reset link", "error": "..."} - Server error
    */
-  async handle({ request, response, logger }: HttpContext) {
+  async handle({ request, response, logger }: HttpContext): Promise<void> {
     const rawEmail = String(request.input('email') || '').toLowerCase()
     const emailMasked = rawEmail ? rawEmail.replace(/(.{2}).+(@.+)/, '$1***$2') : undefined
     logger.info({ event: 'password.reset.request.attempt', emailMasked })

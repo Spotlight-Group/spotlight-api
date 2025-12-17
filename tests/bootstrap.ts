@@ -38,11 +38,13 @@ export const configureSuite: Config['configureSuite'] = (suite) => {
     suite.setup(() => testUtils.httpServer().start())
 
     // Wrap each test in a DB transaction and rollback to keep DB clean
-    suite.each.setup(async () => {
-      await db.beginGlobalTransaction()
-    })
-    suite.each.teardown(async () => {
-      await db.rollbackGlobalTransaction()
+    suite.onTest((test) => {
+      test.setup(async () => {
+        await db.beginGlobalTransaction()
+      })
+      test.teardown(async () => {
+        await db.rollbackGlobalTransaction()
+      })
     })
   }
 }

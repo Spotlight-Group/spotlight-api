@@ -19,7 +19,7 @@ export default class GetMessageController {
    * @responseBody 404 - {"message": "Message not found"} - Message not found
    * @responseBody 500 - {"message": "An error occurred while retrieving the message", "error": "string"} - Internal server error
    */
-  async handle({ request, response, params, auth }: HttpContext) {
+  async handle({ request, response, params, auth }: HttpContext): Promise<void> {
     try {
       await auth.authenticate()
 

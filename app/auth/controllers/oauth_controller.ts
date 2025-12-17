@@ -39,7 +39,7 @@ export default class OauthController {
    * @paramPath provider - The OAuth provider (google, facebook, twitter, github) - @type(string)
    * @responseBody 302 - Redirect to OAuth provider
    */
-  async redirect({ ally, response, params, logger }: HttpContext) {
+  async redirect({ ally, response, params, logger }: HttpContext): Promise<void> {
     try {
       const provider = params.provider
       logger.info({ event: 'oauth.redirect.attempt', provider })
@@ -68,7 +68,7 @@ export default class OauthController {
    * @responseBody 200 - {"user": {"id": 1, "full_name": "John Doe", "email": "user@example.com"}, "token": {"type": "bearer", "value": "oat_1.abc123..."}} - OAuth login successful
    * @responseBody 400 - {"message": "OAuth authentication failed"} - OAuth failed
    */
-  async callback({ ally, response, params, logger }: HttpContext) {
+  async callback({ ally, response, params, logger }: HttpContext): Promise<void> {
     try {
       const provider = params.provider
       logger.info({ event: 'oauth.callback.attempt', provider })
@@ -151,7 +151,7 @@ export default class OauthController {
    * @responseBody 400 - {"message": "No provider account linked to this user"} - No account to unlink
    * @responseBody 401 - {"message": "Authentication required"} - Not authenticated
    */
-  async unlink({ response, auth, params, logger }: HttpContext) {
+  async unlink({ response, auth, params, logger }: HttpContext): Promise<void> {
     try {
       if (!auth.user) {
         logger.warn({ event: 'oauth.unlink.unauthenticated' })

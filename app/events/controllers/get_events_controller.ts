@@ -24,7 +24,7 @@ export default class GetEventsController {
    * @responseBody 401 - Unauthorized - Invalid or missing token
    * @responseBody 500 - {"message": "An error occurred while retrieving events", "error": "string"} - Internal server error
    */
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, response, auth }: HttpContext): Promise<void> {
     try {
       const queryParams = await request.validateUsing(getEventsValidator)
 

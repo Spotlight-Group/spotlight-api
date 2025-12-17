@@ -21,7 +21,7 @@ export default class GetMessagesController {
    * @responseBody 401 - Unauthorized - Invalid or missing token
    * @responseBody 500 - {"message": "An error occurred while retrieving messages", "error": "string"} - Internal server error
    */
-  async handle({ request, response, params, auth }: HttpContext) {
+  async handle({ request, response, params, auth }: HttpContext): Promise<void> {
     try {
       await auth.authenticate()
 

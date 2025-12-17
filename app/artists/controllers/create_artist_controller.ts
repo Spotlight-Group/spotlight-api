@@ -18,7 +18,7 @@ export default class CreateArtistController {
    * @responseBody 400 - {"message": "Validation failed", "errors": []} - Validation errors
    * @responseBody 500 - {"message": "An error occurred while creating the artist", "error": "string"} - Internal server error
    */
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response }: HttpContext): Promise<void> {
     try {
       const payload = await request.validateUsing(createArtistValidator)
 
