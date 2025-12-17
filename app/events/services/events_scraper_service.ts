@@ -5,13 +5,15 @@ import { inject } from '@adonisjs/core'
 import { EventType, EventSubtype } from '#events/enums/events'
 import { EventsService } from '#events/services/events_service'
 import { ArtistsService } from '#artists/services/artists_service'
+import { AiService } from '#services/ai_service'
 import db from '@adonisjs/lucid/services/db'
 
 @inject()
 export class EventsScraperService {
   constructor(
     private eventsService: EventsService,
-    private artistsService: ArtistsService
+    private artistsService: ArtistsService,
+    private aiService: AiService
   ) { }
 
   private async createOrFindArtists(lineup: { name: string; image: string }[]): Promise<number[]> {
@@ -74,6 +76,13 @@ export class EventsScraperService {
   }): Promise<Event> {
     const artistIds = await this.createOrFindArtists(eventData.lineup)
 
+    // Rewrite description using AI
+    const rewrittenDescription = await this.aiService.rewriteDescription(eventData.description)
+
+    // Rate Limiting for Gemini Free Tier (5 RPM)
+    console.log('Waiting 15s for AI Rate Limit...')
+    await new Promise((resolve) => setTimeout(resolve, 15000))
+
     const startDateTime = DateTime.fromISO(eventData.startDate)
     const endDateTime = DateTime.fromISO(eventData.endDate)
 
@@ -86,7 +95,7 @@ export class EventsScraperService {
 
     const event = await this.eventsService.createFromUrl({
       title: eventData.title,
-      description: eventData.description || null,
+      description: rewrittenDescription || null,
       startDate: startDateTime.toJSDate(),
       endDate: endDateTime.toJSDate(),
       startHour: startDateTime.toJSDate(),

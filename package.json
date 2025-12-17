@@ -29,7 +29,7 @@
     "#exceptions/*": "./app/exceptions/*.js",
     "#models/*": "./app/models/**/*.js",
     "#mails/*": "./app/mails/**/*.js",
-    "#services/*": "./app/services/**/*.js",
+    "#services/*": "./app/services/*.js",
     "#listeners/*": "./app/listeners/**/*.js",
     "#middleware/*": "./app/middleware/*.js",
     "#validators/*": "./app/validators/**/*.js",
