@@ -20,7 +20,7 @@ export default class DeleteMessageController {
    * @responseBody 404 - {"message": "Message not found"} - Message not found
    * @responseBody 500 - {"message": "An error occurred while deleting the message", "error": "string"} - Internal server error
    */
-  async handle({ request, response, params, auth }: HttpContext) {
+  async handle({ request, response, params, auth }: HttpContext): Promise<void> {
     try {
       const user = await auth.authenticate()
 

@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer'
 import { DateTime } from 'luxon'
 import Event from '#events/models/event'
 import { inject } from '@adonisjs/core'
-import { EventType, EventSubtype } from '#events/enums/events'
+import { EventSubtype, EventType } from '#events/enums/events'
 import { EventsService } from '#events/services/events_service'
 import { ArtistsService } from '#artists/services/artists_service'
 import { AiService } from '#services/ai_service'
@@ -89,7 +89,7 @@ export class EventsScraperService {
       throw new Error(`Date de fin invalide : ${eventData.endDate}`)
     }
 
-    const event = await this.eventsService.createFromUrl({
+    return await this.eventsService.createFromUrl({
       title: eventData.title,
       description: rewrittenDescription || null,
       startDate: startDateTime.toJSDate(),
@@ -106,8 +106,6 @@ export class EventsScraperService {
       bannerUrl: eventData.bannerUrl,
       artistIds: artistIds.length > 0 ? artistIds : undefined,
     })
-
-    return event
   }
 
   private cleanAddress(address: string): string {
@@ -194,7 +192,7 @@ export class EventsScraperService {
   }
 
   async fetchShotgunEvents(): Promise<Event[]> {
-    // Clear existing events & artists
+    // Clear existing events and artists
     await db.from('events').delete()
     await db.from('artists').delete()
 
@@ -274,8 +272,8 @@ export class EventsScraperService {
       try {
         await page.goto(event.url, { waitUntil: 'domcontentloaded', timeout: 30000 })
 
-        const { description, lineup, location, placeName, startDateTime } =
-          await page.evaluate(() => {
+        const { description, lineup, location, placeName, startDateTime } = await page.evaluate(
+          () => {
             const result = {
               description: '',
               lineup: [] as { name: string; image: string }[],
@@ -311,8 +309,10 @@ export class EventsScraperService {
               }
             }
 
-            const locationAnchor = Array.from(document.querySelectorAll('a.text-foreground'))
-              .find((a): a is HTMLAnchorElement => a instanceof HTMLAnchorElement && a.href.includes('google.com/maps/search'))
+            const locationAnchor = Array.from(document.querySelectorAll('a.text-foreground')).find(
+              (a): a is HTMLAnchorElement =>
+                a instanceof HTMLAnchorElement && a.href.includes('google.com/maps/search')
+            )
 
             if (locationAnchor) {
               result.location = locationAnchor.textContent?.trim() || ''
@@ -335,14 +335,15 @@ export class EventsScraperService {
                 /Du\s+\w+\s+(\d+)\s+(\w+)\.?\s+à\s+(\d{2}:\d{2})\s+Au\s+\w+\s+(\d+)\s+(\w+)\.?\s+à\s+(\d{2}:\d{2})/
               const match = fullText.match(regex)
               if (match) {
-                const [_, startDay, startMonth, startHour, endDay, endMonth, endHour] = match
+                const [, startDay, startMonth, startHour, endDay, endMonth, endHour] = match
                 result.startDateTime = `${new Date().getFullYear()}-${startMonth}-${startDay}T${startHour}:00`
                 result.endDateTime = `${new Date().getFullYear()}-${endMonth}-${endDay}T${endHour}:00`
               }
             }
 
             return result
-          })
+          }
+        )
 
         // Correction parsing des dates avec la fonction buildISODate
         let startDate = ''

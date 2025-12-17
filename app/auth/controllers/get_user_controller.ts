@@ -16,7 +16,7 @@ export default class GetUserController {
    * @responseBody 404 - {"message": "User not found"} - User not found
    * @responseBody 500 - {"message": "An error occurred while retrieving the user", "error": "string"} - Internal server error
    */
-  async handle({ response, auth, logger }: HttpContext) {
+  async handle({ response, auth, logger }: HttpContext): Promise<void> {
     try {
       logger.info({ event: 'user.get.attempt', userId: auth.user?.id })
 

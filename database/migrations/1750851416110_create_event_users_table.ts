@@ -16,17 +16,9 @@ export default class extends BaseSchema {
       // Prevent duplicate participation per (user, event)
       table.unique(['user_id', 'event_id'])
 
-      table
-        .foreign('user_id')
-        .references('id')
-        .inTable('users')
-        .onDelete('CASCADE')
+      table.foreign('user_id').references('id').inTable('users').onDelete('CASCADE')
 
-      table
-        .foreign('event_id')
-        .references('id')
-        .inTable('events')
-        .onDelete('CASCADE')
+      table.foreign('event_id').references('id').inTable('events').onDelete('CASCADE')
 
       // Speed up listing by event and creation date
       table.index(['event_id', 'created_at'])

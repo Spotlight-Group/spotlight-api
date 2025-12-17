@@ -14,7 +14,7 @@ export default class ScrapeEventsController {
    * @responseBody 200 - <Event[]> - Events scraped and saved successfully
    * @responseBody 500 - {"message": "An error occurred while scraping events", "error": "string"} - Internal server error
    */
-  async handle({ response }: HttpContext) {
+  async handle({ response }: HttpContext): Promise<void> {
     try {
       console.log('Starting event scraping process...')
 

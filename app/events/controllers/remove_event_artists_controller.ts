@@ -27,7 +27,7 @@ export default class RemoveEventArtistsController {
    * @responseBody 404 - {"message": "Event not found", "error": "EVENT_NOT_FOUND"} - Event not found
    * @responseBody 500 - {"message": "An error occurred while removing artists from event", "error": "string"} - Internal server error
    */
-  async handle({ request, response, params }: HttpContext) {
+  async handle({ request, response, params }: HttpContext): Promise<void> {
     try {
       const { id: eventId } = await request.validateUsing(eventIdValidator, {
         data: params,

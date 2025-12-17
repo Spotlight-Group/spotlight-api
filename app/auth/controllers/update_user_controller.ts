@@ -20,7 +20,7 @@ export default class UpdateUserController {
    * @responseBody 403 - {"message": "You can only update your own profile"} - Forbidden access
    * @responseBody 500 - {"message": "An error occurred while updating the user", "error": "string"} - Internal server error
    */
-  async handle({ request, response, auth, params, logger }: HttpContext) {
+  async handle({ request, response, auth, params, logger }: HttpContext): Promise<void> {
     try {
       // Ensure user is authenticated
       if (!auth.user) {

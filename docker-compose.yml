@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   ########################
   # 1) Service MySQL #
@@ -9,9 +7,9 @@ services:
     image: mysql:8.0
     restart: unless-stopped
     expose:
-      - "3306"
+      - '3306'
     ports:
-      - "3306:3306"
+      - '3306:3306'
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
       - MYSQL_DATABASE=${DB_DATABASE}
@@ -28,8 +26,8 @@ services:
     image: mailhog/mailhog:latest
     restart: unless-stopped
     ports:
-      - "1025:1025"  # SMTP port
-      - "8025:8025"  # Web UI port
+      - '1025:1025' # SMTP port
+      - '8025:8025' # Web UI port
     networks:
       - spotlight_net
 
@@ -38,14 +36,14 @@ services:
   ########################
   spotlight_api:
     container_name: spotlight_api
-    restart: always
+    restart: unless-stopped # Changed from always to unless-stopped (better practice)
 
     build:
       context: .
       target: dependencies
 
     ports:
-      - "${PORT}:${PORT}"
+      - '${PORT}:${PORT}'
 
     env_file:
       - .env
@@ -55,8 +53,10 @@ services:
       - /home/node/app/node_modules
 
     depends_on:
-      - mysql_db
-      - mailhog
+      mysql_db:
+        condition: service_started
+      mailhog:
+        condition: service_started
 
     environment:
       NODE_ENV: development
@@ -74,11 +74,20 @@ services:
     networks:
       - spotlight_net
 
+    # Health check using our /health endpoint
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${PORT}/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
     command: >
       sh -c "node ace migration:run && node ace db:seed && dumb-init node ace serve --hmr"
 
 volumes:
   mysql_data:
+
 
 networks:
   spotlight_net:

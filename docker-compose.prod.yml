@@ -1,0 +1,82 @@
+# Production Docker Compose Configuration
+# Use this for deploying to production environments 
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  ########################
+  # 1) MySQL Database    #
+  ########################
+  mysql_db:
+    container_name: mysql_db_prod
+    image: mysql:8.0
+    restart: unless-stopped
+    expose:
+      - '3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+    volumes:
+      - mysql_data_prod:/var/lib/mysql
+    networks:
+      - spotlight_net
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ########################
+  # 2) Adonis API        #
+  ########################
+  spotlight_api:
+    container_name: spotlight_api_prod
+    restart: unless-stopped
+
+    build:
+      context: .
+      target: production # Use production stage from Dockerfile
+
+    ports:
+      - '${PORT}:${PORT}'
+
+    # env_file:
+    #   - .env.production # Use production env file or set via environment variables
+
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: ${PORT}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql_db
+      DB_PORT: ${DB_PORT}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+
+    networks:
+      - spotlight_net
+
+    # Health check using our /health endpoint
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${PORT}/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Run migrations before starting
+    command: >
+      sh -c "node ace migration:run --force && dumb-init node build/server.js"
+
+volumes:
+  mysql_data_prod:
+    driver: local
+
+networks:
+  spotlight_net:
+    driver: bridge

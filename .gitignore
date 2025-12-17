@@ -2,6 +2,7 @@
 node_modules
 build
 tmp
+.pnpm-store
 
 # Secrets
 .env
@@ -10,7 +11,7 @@ tmp
 .env.development.local
 
 # Frontend assets compiled code
-public/assets
+public/uploads
 
 # Build tools specific
 npm-debug.log

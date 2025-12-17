@@ -27,7 +27,7 @@ export default class GetArtistsController {
    * @responseBody 400 - {"message": "Validation failed", "errors": []} - Validation errors
    * @responseBody 500 - {"message": "An error occurred while retrieving artists", "error": "string"} - Internal server error
    */
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response }: HttpContext): Promise<void> {
     try {
       const { page, limit, name } = await request.validateUsing(getArtistsValidator, {
         data: request.qs(),

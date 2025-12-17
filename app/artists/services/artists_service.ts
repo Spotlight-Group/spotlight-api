@@ -2,6 +2,8 @@ import Artist from '#artists/models/artist'
 import { MultipartFile } from '@adonisjs/core/bodyparser'
 import { inject } from '@adonisjs/core'
 import { DriveService } from '#core/services/drive_service'
+import NotFoundException from '#exceptions/not_found_exception'
+import BadRequestException from '#exceptions/bad_request_exception'
 
 export interface CreateArtistData {
   name: string
@@ -39,10 +41,10 @@ export class ArtistsService {
    */
   async create(data: CreateArtistData, image: MultipartFile): Promise<Artist> {
     if (!image) {
-      throw new Error('Artist image is required')
+      throw new BadRequestException('Artist image is required')
     }
 
-    // Create artist record
+    // Create an artist record
     const artist = await Artist.create({
       name: data.name,
       image: '', // Will be updated after file upload
@@ -63,21 +65,21 @@ export class ArtistsService {
     } catch (error) {
       // If file upload fails, delete the created artist to maintain consistency
       await artist.delete()
-      throw new Error(`Failed to upload artist image: ${error.message}`)
+      throw new BadRequestException(`Failed to upload artist image: ${error.message}`)
     }
   }
 
   /**
-   * Creates or finds an existing artist with URL-based image (for scraper use case)
+   * Creates or finds an existing artist with URL-based image (for a scraper use case)
    * @param data - The artist data with image URL
    * @return A promise that resolves to the Artist instance
    */
   async createOrFindFromUrl(data: CreateArtistFromUrlData): Promise<Artist> {
-    // Check if artist already exists
+    // Check if an artist already exists
     let artist = await Artist.query().where('name', data.name).first()
 
     if (!artist) {
-      // Create new artist with URL-based image
+      // Create a new artist with URL-based image
       artist = await Artist.create({
         name: data.name,
         image: data.imageUrl,
@@ -94,6 +96,11 @@ export class ArtistsService {
    */
   async getAll(options: GetArtistsOptions = {}) {
     const { page = 1, limit = 20, name } = options
+
+    // Enforce maximum limit to prevent excessive data retrieval
+    const maxLimit = 100
+    const safeLimit = Math.min(limit, maxLimit)
+
     const query = Artist.query()
 
     // Apply filters
@@ -105,7 +112,7 @@ export class ArtistsService {
     query.orderBy('name', 'asc')
 
     // Apply pagination
-    return await query.paginate(page, limit)
+    return await query.paginate(page, safeLimit)
   }
 
   /**
@@ -128,7 +135,7 @@ export class ArtistsService {
   async update(id: number, data: UpdateArtistData, image?: MultipartFile): Promise<Artist> {
     const artist = await Artist.find(id)
     if (!artist) {
-      throw new Error('Artist not found')
+      throw new NotFoundException('Artist not found')
     }
 
     // Update artist fields
@@ -147,7 +154,7 @@ export class ArtistsService {
         // Replace old image with new one
         artist.image = await this.driveService.replaceFile(image, uploadConfig, artist.image)
       } catch (error) {
-        throw new Error(`Failed to upload artist image: ${error.message}`)
+        throw new BadRequestException(`Failed to upload artist image: ${error.message}`)
       }
     }
 

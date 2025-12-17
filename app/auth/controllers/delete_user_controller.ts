@@ -19,7 +19,7 @@ export default class DeleteUserController {
    * @responseBody 404 - {"message": "User not found"} - User not found
    * @responseBody 500 - {"message": "An error occurred while deleting the user", "error": "string"} - Internal server error
    */
-  async handle({ response, auth, params, logger }: HttpContext) {
+  async handle({ response, auth, params, logger }: HttpContext): Promise<void> {
     try {
       // Ensure user is authenticated
       if (!auth.user) {
