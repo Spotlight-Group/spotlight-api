@@ -79,10 +79,6 @@ export class EventsScraperService {
     // Rewrite description using AI
     const rewrittenDescription = await this.aiService.rewriteDescription(eventData.description)
 
-    // Rate Limiting for Gemini Free Tier (5 RPM)
-    console.log('Waiting 15s for AI Rate Limit...')
-    await new Promise((resolve) => setTimeout(resolve, 15000))
-
     const startDateTime = DateTime.fromISO(eventData.startDate)
     const endDateTime = DateTime.fromISO(eventData.endDate)
 
@@ -218,8 +214,10 @@ export class EventsScraperService {
 
     while (true) {
       const loadMoreVisible = await page.evaluate(() => {
-        const btn = Array.from(document.querySelectorAll('button')).find((b) =>
-          b.textContent?.toLowerCase().includes('voir plus')
+        // Search in buttons and links
+        const candidates = Array.from(document.querySelectorAll('button, a'))
+        const btn = candidates.find((b) =>
+          b.textContent?.toLowerCase().trim().includes('voir plus')
         )
         if (btn) {
           ; (btn as HTMLElement).click()
