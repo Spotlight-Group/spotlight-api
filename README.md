@@ -83,7 +83,9 @@ DRIVE_DISK=fs
 
 ## Docker Commands
 
-### Starting the Application
+### Development Environment
+
+#### Starting the Application
 
 To start the application and database services:
 
@@ -97,7 +99,17 @@ To run in detached mode (background):
 docker-compose up -d
 ```
 
-### Stopping the Application
+The application includes automatic health checks. You can verify the health status:
+
+```bash
+# Check health status
+curl http://localhost:3333/health
+
+# View container health status
+docker ps
+```
+
+#### Stopping the Application
 
 To stop the running containers:
 
@@ -111,7 +123,7 @@ To stop and remove volumes (this will delete all data):
 docker-compose down -v
 ```
 
-### Viewing Logs
+#### Viewing Logs
 
 To view logs from all services:
 
@@ -132,7 +144,7 @@ docker-compose logs spotlight_api
 docker-compose logs mysql_db
 ```
 
-### Rebuilding the Application
+#### Rebuilding the Application
 
 If you make changes to the Dockerfile or application code:
 
@@ -142,7 +154,7 @@ docker-compose build
 docker-compose up --build
 ```
 
-### Executing Commands Inside Containers
+#### Executing Commands Inside Containers
 
 To run commands inside the application container:
 
@@ -160,6 +172,58 @@ To run database seeders:
 
 ```bash
 docker-compose exec spotlight_api node ace db:seed
+```
+
+### Production Environment
+
+#### Setup Production Environment
+
+1. Create production environment file:
+
+```bash
+cp .env.production.example .env.production
+```
+
+2. Edit `.env.production` with your production values:
+   - Generate a secure `APP_KEY`: `node ace generate:key`
+   - Set production database credentials
+   - Configure production OAuth credentials
+   - Set production SMTP settings
+   - Configure production frontend URL
+
+3. Start production services:
+
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+4. Verify deployment:
+
+```bash
+# Check health
+curl http://localhost:3333/health
+
+# Check logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Check container status
+docker ps
+```
+
+#### Production Commands
+
+```bash
+# Stop production services
+docker-compose -f docker-compose.prod.yml down
+
+# View production logs
+docker-compose -f docker-compose.prod.yml logs -f spotlight_api
+
+# Run migrations in production
+docker-compose -f docker-compose.prod.yml exec spotlight_api node ace migration:run --force
+
+# Access production container
+docker-compose -f docker-compose.prod.yml exec spotlight_api sh
 ```
 
 ## Running Locally (Without Docker)
