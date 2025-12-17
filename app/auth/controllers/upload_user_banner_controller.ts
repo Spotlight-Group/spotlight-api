@@ -20,7 +20,7 @@ export default class UploadUserBannerController {
    * @responseBody 403 - {"message": "You can only upload banner for your own profile"} - Forbidden access
    * @responseBody 500 - {"message": "An error occurred while uploading the banner", "error": "string"} - Internal server error
    */
-  async handle({ request, response, auth, params, logger }: HttpContext) {
+  async handle({ request, response, auth, params, logger }: HttpContext): Promise<void> {
     try {
       // Ensure user is authenticated
       if (!auth.user) {

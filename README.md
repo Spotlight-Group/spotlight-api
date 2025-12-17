@@ -3,6 +3,7 @@
 This repository contains a RESTful API built with AdonisJS and Docker. The application uses MySQL as its database.
 
 ## Database schema
+
 ![Untitled-4](https://github.com/user-attachments/assets/8fe78871-7e78-43cc-bbde-0753b629aa0b)
 
 ## Prerequisites
@@ -203,29 +204,29 @@ tests/
 #### Writing Tests
 
 Tests use Japa with the following plugins:
+
 - `@japa/assert`: Assertions library
 - `@japa/api-client`: HTTP client for API testing
 - `@japa/plugin-adonisjs`: AdonisJS integration
 
 Example functional test:
+
 ```typescript
 import { test } from '@japa/runner'
 import { ApiClient } from '@japa/api-client'
 
 test.group('Auth - Login Controller', () => {
   test('should login user with valid credentials', async ({ client }: { client: ApiClient }) => {
-    const response = await client
-      .post('/login')
-      .json({
-        email: 'test@example.com',
-        password: 'password123'
-      })
+    const response = await client.post('/login').json({
+      email: 'test@example.com',
+      password: 'password123',
+    })
 
     response.assertStatus(200)
     response.assertBodyContains({
       user: {
-        email: 'test@example.com'
-      }
+        email: 'test@example.com',
+      },
     })
   })
 })
@@ -234,6 +235,7 @@ test.group('Auth - Login Controller', () => {
 #### Test Database
 
 Tests automatically use a separate test database configuration. The test environment:
+
 - Uses `NODE_ENV=test`
 - Runs database migrations automatically
 - Cleans up data between test runs
@@ -242,6 +244,7 @@ Tests automatically use a separate test database configuration. The test environ
 #### Continuous Integration
 
 For CI/CD pipelines, run tests with:
+
 ```bash
 # Set test environment
 export NODE_ENV=test
@@ -259,6 +262,7 @@ node ace test --coverage --reporter=lcov
 ## API Endpoints
 
 ### Authentication
+
 - `POST /register`: Register a new user account
 - `POST /login`: Login with email and password
 - `GET /oauth/:provider`: Redirect to OAuth provider (google, facebook, github, twitter)
@@ -268,6 +272,7 @@ node ace test --coverage --reporter=lcov
 - `POST /reset-password`: Reset password with token
 
 ### User Management (Authenticated)
+
 - `PUT /users/me`: Update current user profile
 - `PUT /users/:id`: Update user profile by ID
 - `DELETE /users/me`: Delete current user account
@@ -276,6 +281,7 @@ node ace test --coverage --reporter=lcov
 - `DELETE /oauth/:provider/unlink`: Unlink OAuth provider account
 
 ### Events Management (Authenticated)
+
 - `GET /events`: Get all events with pagination and filtering
 - `POST /events`: Create a new event
 - `GET /events/:id`: Get event details by ID
@@ -284,11 +290,13 @@ node ace test --coverage --reporter=lcov
 - `DELETE /events/:id`: Delete event by ID
 
 ### Event-Artist Relationships (Authenticated)
+
 - `GET /events/:id/artists`: Get artists associated with an event
 - `POST /events/:id/artists`: Add artists to an event
 - `DELETE /events/:id/artists`: Remove artists from an event
 
 ### Artists Management (Authenticated)
+
 - `GET /artists`: Get all artists with pagination
 - `POST /artists`: Create a new artist
 - `GET /artists/:id`: Get artist details by ID
@@ -297,6 +305,7 @@ node ace test --coverage --reporter=lcov
 - `DELETE /artists/:id`: Delete artist by ID
 
 ### Messages Management (Authenticated)
+
 - `POST /messages`: Create a new message for an event
 - `GET /events/:eventId/messages`: Get all messages for an event
 - `GET /messages/:id`: Get message details by ID
@@ -305,10 +314,12 @@ node ace test --coverage --reporter=lcov
 - `DELETE /messages/:id`: Delete message by ID
 
 ### Documentation
+
 - `GET /swagger`: Get API documentation in YAML format
 - `GET /docs`: View interactive Swagger UI documentation
 
 ### Testing
+
 - `GET /scrap/events/toulouse`: Scrape events from Toulouse (testing endpoint)
 
 ## API Testing with Postman
@@ -334,6 +345,7 @@ A comprehensive Postman collection (`postman_collection.json`) is included in th
 
 2. **Configure Environment Variables**:
    Create a new environment in Postman with the following variables:
+
    ```
    base_url: http://localhost:3333 (or your server URL)
    auth_token: (will be set automatically after login/register)
@@ -378,11 +390,13 @@ A comprehensive Postman collection (`postman_collection.json`) is included in th
 ### Manual Testing
 
 1. **Start the Application**:
+
    ```bash
    docker-compose up
    ```
 
 2. **Run Database Migrations**:
+
    ```bash
    docker-compose exec spotlight_api node ace migration:run
    ```
@@ -404,6 +418,7 @@ A comprehensive Postman collection (`postman_collection.json`) is included in th
 ### Automated Testing
 
 Run the test suite:
+
 ```bash
 pnpm test
 ```
@@ -411,6 +426,7 @@ pnpm test
 ### API Documentation
 
 Access the interactive API documentation:
+
 - **Swagger UI**: http://localhost:3333/docs
 - **OpenAPI Spec**: http://localhost:3333/swagger
 
@@ -428,12 +444,14 @@ Access the interactive API documentation:
 ## Docker Configuration
 
 The application uses a multi-stage Docker build process:
+
 - Base stage: Sets up the Node.js environment
 - Dependencies stage: Installs all dependencies
 - Build stage: Builds the application
 - Production stage: Creates a minimal production image
 
 The docker-compose.yml file defines two services:
+
 - `mysql_db`: MySQL database
 - `spotlight_api`: AdonisJS application
 

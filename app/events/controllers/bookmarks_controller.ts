@@ -16,7 +16,7 @@ export default class BookmarksController {
    * Add an event to user's bookmarks
    * POST /bookmarks
    */
-  async store({ request, response, auth }: HttpContext) {
+  async store({ request, response, auth }: HttpContext): Promise<void> {
     try {
       const user = auth.getUserOrFail()
       const { eventId } = await request.validateUsing(bookmarkEventValidator)
@@ -45,7 +45,7 @@ export default class BookmarksController {
    * Remove an event from user's bookmarks
    * DELETE /bookmarks/:eventId
    */
-  async destroy({ request, params, response, auth }: HttpContext) {
+  async destroy({ request, params, response, auth }: HttpContext): Promise<void> {
     try {
       const user = auth.getUserOrFail()
       const { eventId } = await request.validateUsing(removeBookmarkValidator, {
@@ -75,7 +75,7 @@ export default class BookmarksController {
    * Get all bookmarked events for the authenticated user
    * GET /bookmarks
    */
-  async index({ request, response, auth }: HttpContext) {
+  async index({ request, response, auth }: HttpContext): Promise<void> {
     try {
       const user = auth.getUserOrFail()
       const { page = 1, limit = 20 } = await request.validateUsing(getUserBookmarksValidator)
@@ -98,7 +98,7 @@ export default class BookmarksController {
    * Check if an event is bookmarked by the user
    * GET /bookmarks/check/:eventId
    */
-  async check({ request, params, response, auth }: HttpContext) {
+  async check({ request, params, response, auth }: HttpContext): Promise<void> {
     try {
       const user = auth.getUserOrFail()
       const { eventId } = await request.validateUsing(checkBookmarkValidator, {
@@ -126,7 +126,7 @@ export default class BookmarksController {
    * Get bookmark statistics for the authenticated user
    * GET /bookmarks/stats
    */
-  async stats({ response, auth }: HttpContext) {
+  async stats({ response, auth }: HttpContext): Promise<void> {
     try {
       const user = auth.getUserOrFail()
 

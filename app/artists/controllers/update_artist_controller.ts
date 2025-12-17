@@ -22,7 +22,7 @@ export default class UpdateArtistController {
    * @responseBody 404 - {"message": "Artist not found", "error": "ARTIST_NOT_FOUND"} - Artist not found
    * @responseBody 500 - {"message": "An error occurred while updating the artist", "error": "string"} - Internal server error
    */
-  async handle({ request, response, params }: HttpContext) {
+  async handle({ request, response, params }: HttpContext): Promise<void> {
     try {
       const { id: artistId } = await request.validateUsing(artistIdValidator, {
         data: params,

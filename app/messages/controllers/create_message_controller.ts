@@ -18,7 +18,7 @@ export default class CreateMessageController {
    * @responseBody 401 - Unauthorized - Invalid or missing token
    * @responseBody 500 - {"message": "An error occurred while creating the message", "error": "string"} - Internal server error
    */
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, response, auth }: HttpContext): Promise<void> {
     try {
       const payload = await request.validateUsing(createMessageValidator)
       const user = await auth.authenticate()
