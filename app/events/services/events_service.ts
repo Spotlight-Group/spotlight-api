@@ -217,6 +217,10 @@ export class EventsService {
   async getAll(options: GetEventsOptions = {}) {
     const { page = 1, limit = 20, type, subtype, city, startDate, endDate, userId } = options
 
+    // Enforce maximum limit to prevent excessive data retrieval
+    const maxLimit = 100
+    const safeLimit = Math.min(limit, maxLimit)
+
     const query = Event.query()
 
     // Apply filters
@@ -251,7 +255,7 @@ export class EventsService {
     query.orderBy('startDate', 'asc')
 
     // Apply pagination
-    return await query.paginate(page, limit)
+    return await query.paginate(page, safeLimit)
   }
 
   /**

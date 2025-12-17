@@ -96,6 +96,11 @@ export class ArtistsService {
    */
   async getAll(options: GetArtistsOptions = {}) {
     const { page = 1, limit = 20, name } = options
+
+    // Enforce maximum limit to prevent excessive data retrieval
+    const maxLimit = 100
+    const safeLimit = Math.min(limit, maxLimit)
+
     const query = Artist.query()
 
     // Apply filters
@@ -107,7 +112,7 @@ export class ArtistsService {
     query.orderBy('name', 'asc')
 
     // Apply pagination
-    return await query.paginate(page, limit)
+    return await query.paginate(page, safeLimit)
   }
 
   /**
