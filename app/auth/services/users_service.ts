@@ -8,6 +8,7 @@ import { DriveService } from '#core/services/drive_service'
 import { EmailsService } from '#auth/services/emails_service'
 import NotFoundException from '#exceptions/not_found_exception'
 import BadRequestException from '#exceptions/bad_request_exception'
+import { cuid } from '@adonisjs/core/helpers'
 
 export interface UpdateUserData {
   full_name?: string
@@ -231,7 +232,7 @@ export class UsersService {
       user = await User.create({
         full_name: fullName,
         email,
-        password: Math.random().toString(36).slice(-12),
+        password: cuid(), // Cryptographically secure random password for OAuth users
         role: UserRoles.USER, // Set default role to USER
         bannerUrl: this.DEFAULT_BANNER_URL_TEMPLATE.replace('{email}', email).replace(
           '{fullName}',
