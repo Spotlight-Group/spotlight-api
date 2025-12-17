@@ -2,6 +2,32 @@
 
 This repository contains a RESTful API built with AdonisJS and Docker. The application uses MySQL as its database.
 
+## ✨ Key Features
+
+### 🔒 Security
+- **Custom Exception Handling**: Specialized exception classes for consistent error responses
+- **Input Sanitization**: Protection against XSS and injection attacks
+- **Rate Limiting**: API abuse prevention with configurable limits
+- **Comprehensive Error Logging**: Full request context tracking
+- **OAuth Security**: Cryptographically secure password generation using cuid()
+
+### ⚡ Performance
+- **Database Indexes**: Composite indexes for optimized queries (type, city, date combinations)
+- **Pagination Limits**: Maximum 100 items per request to prevent overload
+- **N+1 Query Prevention**: Eager loading for related data
+- **Optimized City Search**: Exact match + partial match for better index utilization
+
+### 🏗️ Architecture
+- **Clean Architecture**: DTOs, Base Controllers, and layered structure
+- **TypeScript**: Full type safety with explicit return types
+- **API Versioning**: Ready for v1, v2, v3 evolution
+- **Environment Validation**: Startup validation of all required variables
+
+### 📊 Monitoring & Logging
+- **Health Check Endpoint**: `/health` for Docker and load balancer monitoring
+- **Request Logging**: Automatic logging of all API requests with performance metrics
+- **Error Tracking**: Comprehensive error logging with stack traces and context
+
 ## Database schema
 
 ![Untitled-4](https://github.com/user-attachments/assets/8fe78871-7e78-43cc-bbde-0753b629aa0b)
@@ -17,18 +43,42 @@ This repository contains a RESTful API built with AdonisJS and Docker. The appli
 
 The application uses environment variables defined in the `.env` file. A sample configuration is provided below:
 
-```
+### Required Variables
+
+```bash
+# Application
 TZ=UTC
 PORT=3333
 HOST=0.0.0.0
 LOG_LEVEL=info
 APP_KEY=tiELO02WS3byq4rRiE18S9HWW3bx9J8G
 NODE_ENV=development
+
+# Database
 DB_HOST=mysql_db
 DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=root
 DB_DATABASE=spotlight
+
+# OAuth (Google)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3333/oauth/google/callback
+
+# Email (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+MAIL_FROM=noreply@spotlight.com
+
+# Frontend
+FRONTENURL=http://localhost:5173
+
+# Optional
+APP_URL=http://localhost:3333
+DRIVE_DISK=fs
 ```
 
 ## Docker Commands
@@ -258,6 +308,46 @@ pnpm test
 # Generate coverage report
 node ace test --coverage --reporter=lcov
 ```
+
+## 🏥 Health Check & Monitoring
+
+### Health Check Endpoint
+
+```bash
+curl http://localhost:3333/health
+```
+
+Response:
+```json
+{
+  "status": "ok",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "uptime": 123.45,
+  "database": "ok",
+  "memory": {
+    "used": 50,
+    "total": 100,
+    "unit": "MB"
+  }
+}
+```
+
+Use this endpoint for:
+- Docker health checks
+- Kubernetes liveness/readiness probes
+- Load balancer health monitoring
+- Uptime monitoring services
+
+### Request Logging
+
+All API requests are automatically logged with:
+- HTTP method, URL, status code
+- Response time (duration)
+- IP address and user agent
+- User ID (when authenticated)
+- Warnings for slow requests (>1s)
+
+Logs are output in structured JSON format for easy parsing.
 
 ## API Endpoints
 
