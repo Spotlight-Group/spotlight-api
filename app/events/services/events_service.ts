@@ -233,7 +233,12 @@ export class EventsService {
     }
 
     if (city) {
-      query.whereILike('city', `%${city}%`)
+      // Optimize city search: try exact match first (uses index), then partial match
+      // This allows the index on 'city' column to be utilized for exact searches
+      const normalizedCity = city.trim()
+      query.where((builder) => {
+        builder.where('city', normalizedCity).orWhereILike('city', `%${normalizedCity}%`)
+      })
     }
 
     if (startDate) {

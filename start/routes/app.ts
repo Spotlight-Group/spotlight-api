@@ -14,6 +14,12 @@ router.get('/docs', async () => {
   return AutoSwagger.default.ui('/swagger', swagger)
 })
 
+// Health check controller import (needs to be before route usage)
+const HealthController = () => import('#core/controllers/health_controller')
+
+// Health check endpoint (no auth required)
+router.get('/health', [HealthController])
+
 // GUEST region Controller's Imports
 const LoginController = () => import('#auth/controllers/login_controller')
 const RegisterController = () => import('#auth/controllers/register_controller')
