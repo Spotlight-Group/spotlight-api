@@ -5,14 +5,16 @@ import { inject } from '@adonisjs/core'
 import { EventSubtype, EventType } from '#events/enums/events'
 import { EventsService } from '#events/services/events_service'
 import { ArtistsService } from '#artists/services/artists_service'
+import { AiService } from '#services/ai_service'
 import db from '@adonisjs/lucid/services/db'
 
 @inject()
 export class EventsScraperService {
   constructor(
     private eventsService: EventsService,
-    private artistsService: ArtistsService
-  ) {}
+    private artistsService: ArtistsService,
+    private aiService: AiService
+  ) { }
 
   private async createOrFindArtists(lineup: { name: string; image: string }[]): Promise<number[]> {
     const artistIds: number[] = []
@@ -74,6 +76,9 @@ export class EventsScraperService {
   }): Promise<Event> {
     const artistIds = await this.createOrFindArtists(eventData.lineup)
 
+    // Rewrite description using AI
+    const rewrittenDescription = await this.aiService.rewriteDescription(eventData.description)
+
     const startDateTime = DateTime.fromISO(eventData.startDate)
     const endDateTime = DateTime.fromISO(eventData.endDate)
 
@@ -86,7 +91,7 @@ export class EventsScraperService {
 
     return await this.eventsService.createFromUrl({
       title: eventData.title,
-      description: eventData.description || null,
+      description: rewrittenDescription || null,
       startDate: startDateTime.toJSDate(),
       endDate: endDateTime.toJSDate(),
       startHour: startDateTime.toJSDate(),
@@ -103,23 +108,82 @@ export class EventsScraperService {
     })
   }
 
+  private cleanAddress(address: string): string {
+    const parts = address.split(',').map((p) => p.trim())
+    if (parts.length > 1) {
+      const firstPart = parts[0]
+      const hasDigits = /\d/.test(firstPart)
+      const streetTypes = [
+        'rue',
+        'avenue',
+        'place',
+        'boulevard',
+        'allée',
+        'impasse',
+        'quai',
+        'chemin',
+        'route',
+      ]
+      const startsWithStreetType = streetTypes.some((t) => firstPart.toLowerCase().startsWith(t))
+
+      if (!hasDigits && !startsWithStreetType) {
+        return parts.slice(1).join(', ')
+      }
+    }
+    return address
+  }
+
   private async geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+    // Basic Rate Limiting
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`,
+      let query = address
+      let response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`,
         {
           headers: {
-            'User-Agent': 'EventScraperBot/1.0 (you@example.com)',
+            'User-Agent': 'SpotlightApp/1.0 (contact@spotlight.app)',
           },
         }
       )
-      const data = (await response.json()) as { lat: string; lon: string }[]
+
+      if (!response.ok) {
+        console.warn(`Geocoding failed for ${query}: ${response.status} ${response.statusText}`)
+        return null
+      }
+
+      let data = (await response.json()) as { lat: string; lon: string }[]
+
+      // Retry with cleaned address if no results
+      if (!data || data.length === 0) {
+        const cleaned = this.cleanAddress(address)
+        if (cleaned !== address) {
+          // Rate limit for retry too
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+
+          response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleaned)}`,
+            {
+              headers: {
+                'User-Agent': 'SpotlightApp/1.0 (contact@spotlight.app)',
+              },
+            }
+          )
+
+          if (response.ok) {
+            data = (await response.json()) as { lat: string; lon: string }[]
+          }
+        }
+      }
+
       if (data && data.length > 0) {
         return {
           lat: Number.parseFloat(data[0].lat),
           lng: Number.parseFloat(data[0].lon),
         }
       }
+
       return null
     } catch (error) {
       console.warn('Erreur lors du géocodage :', error)
@@ -148,11 +212,13 @@ export class EventsScraperService {
 
     while (true) {
       const loadMoreVisible = await page.evaluate(() => {
-        const btn = Array.from(document.querySelectorAll('button')).find((b) =>
-          b.textContent?.toLowerCase().includes('voir plus')
+        // Search in buttons and links
+        const candidates = Array.from(document.querySelectorAll('button, a'))
+        const btn = candidates.find((b) =>
+          b.textContent?.toLowerCase().trim().includes('voir plus')
         )
         if (btn) {
-          ;(btn as HTMLElement).click()
+          ; (btn as HTMLElement).click()
           return true
         }
         return false
