@@ -12,7 +12,7 @@ export class EventsScraperService {
   constructor(
     private eventsService: EventsService,
     private artistsService: ArtistsService
-  ) {}
+  ) { }
 
   private async createOrFindArtists(lineup: { name: string; image: string }[]): Promise<number[]> {
     const artistIds: number[] = []
@@ -105,23 +105,82 @@ export class EventsScraperService {
     return event
   }
 
+  private cleanAddress(address: string): string {
+    const parts = address.split(',').map((p) => p.trim())
+    if (parts.length > 1) {
+      const firstPart = parts[0]
+      const hasDigits = /\d/.test(firstPart)
+      const streetTypes = [
+        'rue',
+        'avenue',
+        'place',
+        'boulevard',
+        'allée',
+        'impasse',
+        'quai',
+        'chemin',
+        'route',
+      ]
+      const startsWithStreetType = streetTypes.some((t) => firstPart.toLowerCase().startsWith(t))
+
+      if (!hasDigits && !startsWithStreetType) {
+        return parts.slice(1).join(', ')
+      }
+    }
+    return address
+  }
+
   private async geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+    // Basic Rate Limiting
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`,
+      let query = address
+      let response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`,
         {
           headers: {
-            'User-Agent': 'EventScraperBot/1.0 (you@example.com)',
+            'User-Agent': 'SpotlightApp/1.0 (contact@spotlight.app)',
           },
         }
       )
-      const data = (await response.json()) as { lat: string; lon: string }[]
+
+      if (!response.ok) {
+        console.warn(`Geocoding failed for ${query}: ${response.status} ${response.statusText}`)
+        return null
+      }
+
+      let data = (await response.json()) as { lat: string; lon: string }[]
+
+      // Retry with cleaned address if no results
+      if (!data || data.length === 0) {
+        const cleaned = this.cleanAddress(address)
+        if (cleaned !== address) {
+          // Rate limit for retry too
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+
+          response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleaned)}`,
+            {
+              headers: {
+                'User-Agent': 'SpotlightApp/1.0 (contact@spotlight.app)',
+              },
+            }
+          )
+
+          if (response.ok) {
+            data = (await response.json()) as { lat: string; lon: string }[]
+          }
+        }
+      }
+
       if (data && data.length > 0) {
         return {
           lat: Number.parseFloat(data[0].lat),
           lng: Number.parseFloat(data[0].lon),
         }
       }
+
       return null
     } catch (error) {
       console.warn('Erreur lors du géocodage :', error)
@@ -154,7 +213,7 @@ export class EventsScraperService {
           b.textContent?.toLowerCase().includes('voir plus')
         )
         if (btn) {
-          ;(btn as HTMLElement).click()
+          ; (btn as HTMLElement).click()
           return true
         }
         return false
