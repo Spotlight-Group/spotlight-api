@@ -1,6 +1,7 @@
 import EventUser from '#events/models/event_user'
 import Event from '#events/models/event'
 import User from '#auth/models/user'
+import NotFoundException from '#exceptions/not_found_exception'
 
 export interface BookmarkEventData {
   userId: number
@@ -19,13 +20,13 @@ export class BookmarksService {
     // Check if event exists
     const event = await Event.find(eventId)
     if (!event) {
-      throw new Error('Event not found')
+      throw new NotFoundException('Event not found')
     }
 
     // Check if user exists
     const user = await User.find(userId)
     if (!user) {
-      throw new Error('User not found')
+      throw new NotFoundException('User not found')
     }
 
     // Check if EventUser record already exists

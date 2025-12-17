@@ -1,6 +1,7 @@
 import Message from '#messages/models/message'
 import { inject } from '@adonisjs/core'
 import { cuid } from '@adonisjs/core/helpers'
+import AuthorizationException from '#exceptions/authorization_exception'
 
 export class MessageDto {
   declare content: string
@@ -39,14 +40,12 @@ export class MessagesService {
   async getByEventId(eventId: string, options: Partial<MessagePaginationOptions> = {}) {
     const { page = 1, limit = 20 } = options
 
-    const messages = await Message.query()
+    return await Message.query()
       .where('eventId', eventId)
       .preload('user')
       .preload('event')
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
-
-    return messages
   }
 
   /**
@@ -107,7 +106,7 @@ export class MessagesService {
    */
   private verifyMessageOwnership(message: Message, userId: string): void {
     if (message.userId !== userId) {
-      throw new Error('Unauthorized: You can only manage your own messages')
+      throw new AuthorizationException('Unauthorized: You can only manage your own messages')
     }
   }
 }

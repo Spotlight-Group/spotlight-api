@@ -36,22 +36,38 @@ export default class extends BaseSeeder {
 
     // Create or update the example event for "tomorrow"
     const gig = await Event.updateOrCreate(
-      { title: 'Live @ Bikini', city: 'Toulouse' },
+      { title: 'Le Petit Bikini', city: 'Toulouse' },
       {
-        title: 'Live @ Bikini',
-        description: 'Showcase au Bikini',
-        bannerUrl: null,
+        title: 'Le Petit Bikini',
+        description:
+          'Apéro Disco\n' +
+          '\n' +
+          'mix by Madame Gaultier\n' +
+          '\n' +
+          '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n' +
+          '\n' +
+          'Piscine - Food - Cocktails - Jeux - Animations - Guinguette - …\n' +
+          '\n' +
+          'Réservations pour le bistro :\n' +
+          '\n' +
+          '05 62 24 09 50 // resa@lebikini.com\n' +
+          '\n' +
+          'Baignade autorisée\n' +
+          '\n' +
+          'Entrée libre dans la limite des places disponibles\n',
+        bannerUrl:
+          'https://lebikini.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Frf3cqo3h%2Fproduction%2F412ea9eae3a70a826c2524be9aa3fd8fd28b1974-1321x900.png%3Frect%3D1%2C0%2C1320%2C900%26w%3D1000%26h%3D682%26q%3D80%26dpr%3D2&w=750&q=80',
         startDate: day,
         endDate: day,
         startHour: day.set({ hour: 20, minute: 0, second: 0, millisecond: 0 }),
-        openHour: null,
+        openHour: day.set({ hour: 18, minute: 0, second: 0, millisecond: 0 }),
         latitude: 43.5615,
         longitude: 1.4857,
         placeName: 'Le Bikini',
         address: 'Rue Théodore Monod',
         city: 'Toulouse',
         type: EventType.CONCERT,
-        subtype: EventSubtype.ROCK,
+        subtype: EventSubtype.HIPHOP,
       }
     )
 

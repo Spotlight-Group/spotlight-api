@@ -6,6 +6,8 @@ import { MultipartFile } from '@adonisjs/core/bodyparser'
 import { inject } from '@adonisjs/core'
 import { DriveService } from '#core/services/drive_service'
 import { EmailsService } from '#auth/services/emails_service'
+import NotFoundException from '#exceptions/not_found_exception'
+import BadRequestException from '#exceptions/bad_request_exception'
 
 export interface UpdateUserData {
   full_name?: string
@@ -125,7 +127,7 @@ export class UsersService {
   async resetPassword(data: ResetPasswordData): Promise<User> {
     const user = await User.findBy('email', data.email)
     if (!user) {
-      throw new Error('User not found')
+      throw new NotFoundException('User not found')
     }
 
     user.password = data.newPassword
@@ -135,7 +137,7 @@ export class UsersService {
   }
 
   /**
-   * Sends a password reset email to the user.
+   * Sends a password-reset email to the user.
    * @param email - The user's email address.
    * @return A promise that resolves to the User instance if found, null otherwise.
    */
@@ -158,7 +160,7 @@ export class UsersService {
    */
   async uploadBanner(userId: number, banner: MultipartFile): Promise<User> {
     if (!banner) {
-      throw new Error('Banner image is required')
+      throw new BadRequestException('Banner image is required')
     }
 
     const user = await this.findUserOrFail(userId)
@@ -221,11 +223,11 @@ export class UsersService {
 
     if (existingProvider) return existingProvider.user
 
-    // Check if user exists with this email
+    // Check if the user exists with this email
     let user = await User.query().where('email', email).first()
 
     if (!user) {
-      // Create new user
+      // Create a new user
       user = await User.create({
         full_name: fullName,
         email,
@@ -297,7 +299,7 @@ export class UsersService {
   private async findUserOrFail(id: number): Promise<User> {
     const user = await User.find(id)
     if (!user) {
-      throw new Error('User not found')
+      throw new NotFoundException('User not found')
     }
     return user
   }

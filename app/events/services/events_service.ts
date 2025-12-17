@@ -6,6 +6,8 @@ import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
 import { EventType, EventSubtype } from '#events/enums/events'
 import { DriveService } from '#core/services/drive_service'
+import NotFoundException from '#exceptions/not_found_exception'
+import BadRequestException from '#exceptions/bad_request_exception'
 
 export interface CreateEventData {
   title: string
@@ -90,7 +92,7 @@ export class EventsService {
     if (existingArtists.length !== artistIds.length) {
       const existingIds = existingArtists.map((artist) => artist.id)
       const missingIds = artistIds.filter((artistId) => !existingIds.includes(artistId))
-      throw new Error(`Artists not found: ${missingIds.join(', ')}`)
+      throw new NotFoundException(`Artists not found: ${missingIds.join(', ')}`)
     }
   }
 
@@ -103,7 +105,7 @@ export class EventsService {
    */
   async create(data: CreateEventData, banner: MultipartFile): Promise<Event> {
     if (!banner) {
-      throw new Error('Banner image is required')
+      throw new BadRequestException('Banner image is required')
     }
 
     // Validate artists exist if provided
@@ -111,7 +113,7 @@ export class EventsService {
       await this.validateArtistsExist(data.artistIds)
     }
 
-    // Create event record
+    // Create an event record
     const event = await Event.create({
       title: data.title,
       description: data.description ?? null,
@@ -153,12 +155,14 @@ export class EventsService {
     } catch (error) {
       // If file upload or artist association fails, delete the created event to maintain consistency
       await event.delete()
-      throw new Error(`Failed to upload banner image or associate artists: ${error.message}`)
+      throw new BadRequestException(
+        `Failed to upload banner image or associate artists: ${error.message}`
+      )
     }
   }
 
   /**
-   * Creates an event with URL-based banner (for scraper use case)
+   * Creates an event with URL-based banner (for a scraper use case)
    * @param data - The event data with banner URL
    * @return A promise that resolves to the created Event instance
    * @throws Error if artist validation fails
@@ -169,7 +173,7 @@ export class EventsService {
       await this.validateArtistsExist(data.artistIds)
     }
 
-    // Create event record with URL-based banner
+    // Create an event record with URL-based banner
     const event = await Event.create({
       title: data.title,
       description: data.description ?? null,
@@ -199,9 +203,9 @@ export class EventsService {
 
       return event
     } catch (error) {
-      // If artist association fails, delete the created event to maintain consistency
+      // If the artist association fails, delete the created event to maintain consistency
       await event.delete()
-      throw new Error(`Failed to associate artists: ${error.message}`)
+      throw new BadRequestException(`Failed to associate artists: ${error.message}`)
     }
   }
 
@@ -284,7 +288,7 @@ export class EventsService {
   async update(id: number, data: UpdateEventData, banner?: MultipartFile): Promise<Event> {
     const event = await Event.find(id)
     if (!event) {
-      throw new Error('Event not found')
+      throw new NotFoundException('Event not found')
     }
 
     // Validate artists exist if provided
@@ -322,7 +326,7 @@ export class EventsService {
         // Replace old banner with new one
         event.bannerUrl = await this.driveService.replaceFile(banner, uploadConfig, event.bannerUrl)
       } catch (error) {
-        throw new Error(`Failed to upload banner image: ${error.message}`)
+        throw new BadRequestException(`Failed to upload banner image: ${error.message}`)
       }
     }
 
