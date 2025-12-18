@@ -11,4 +11,10 @@ export enum EventSubtype {
   JAZZ = 'jazz',
   TECHNO = 'techno',
   CLASSICAL = 'classical',
+  FOOTBALL = 'football',
+  RUGBY = 'rugby',
+  BASKETBALL = 'basketball',
+  HANDBALL = 'handball',
+  VOLLEYBALL = 'volleyball',
+  TENNIS = 'tennis',
 }
