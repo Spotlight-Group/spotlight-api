@@ -192,6 +192,7 @@ export class EventsScraperService {
   }
 
   async fetchShotgunEvents(): Promise<Event[]> {
+    console.log('[Scraper] Starting fetchShotgunEvents...')
     // Clear existing events and artists
     await db.from('events').delete()
     await db.from('artists').delete()
@@ -210,7 +211,11 @@ export class EventsScraperService {
 
     const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-    while (true) {
+    console.log('[Scraper] Loading more events...')
+    let clicks = 0
+    const MAX_CLICKS = 10
+
+    while (clicks < MAX_CLICKS) {
       const loadMoreVisible = await page.evaluate(() => {
         // Search in buttons and links
         const candidates = Array.from(document.querySelectorAll('button, a'))
@@ -224,6 +229,8 @@ export class EventsScraperService {
         return false
       })
       if (!loadMoreVisible) break
+      clicks++
+      console.log(`[Scraper] "Voir plus" clicked (${clicks}/${MAX_CLICKS})`)
       await wait(2500)
     }
 
@@ -245,6 +252,8 @@ export class EventsScraperService {
         .filter((e) => e.title && e.date)
     })
 
+    await page.close() // Close the listing page as we don't need it anymore
+
     const now = new Date()
     const nowUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
 
@@ -256,7 +265,7 @@ export class EventsScraperService {
       inFourWeeks.getUTCDate()
     )
 
-    const events = rawEvents.filter((event) => {
+    const eventsToProcess = rawEvents.filter((event) => {
       const eventDate = new Date(event.date)
       const eventUtc = Date.UTC(
         eventDate.getUTCFullYear(),
@@ -266,130 +275,151 @@ export class EventsScraperService {
       return eventUtc >= nowUtc && eventUtc <= inFourWeeksUtc
     })
 
+    console.log(`[Scraper] Found ${rawEvents.length} raw events. Processing ${eventsToProcess.length} events in next 4 weeks.`)
+
     const createdEvents: Event[] = []
+    const CONCURRENCY = 3
+    const queue = [...eventsToProcess]
+    let processedCount = 0
 
-    for (const event of events) {
+    const worker = async (id: number) => {
+      const workerPage = await browser.newPage()
       try {
-        await page.goto(event.url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+        while (queue.length > 0) {
+          const event = queue.shift()
+          if (!event) break
 
-        const { description, lineup, location, placeName, startDateTime } = await page.evaluate(
-          () => {
-            const result = {
-              description: '',
-              lineup: [] as { name: string; image: string }[],
-              location: '',
-              placeName: '',
-              startDateTime: '',
-              endDateTime: '',
-            }
+          processedCount++
+          console.log(`[Scraper][Worker ${id}] Processing (${processedCount}/${eventsToProcess.length}): ${event.title}`)
 
-            const aboutHeader = Array.from(document.querySelectorAll('.text-2xl')).find(
-              (h) => h.textContent?.trim() === 'À propos'
-            )
-            if (aboutHeader) {
-              const parent = aboutHeader.closest('section') || aboutHeader.parentElement
-              const descDiv = parent?.querySelector('div.whitespace-pre-wrap')
-              if (descDiv) {
-                result.description = descDiv.textContent?.trim() || ''
+          try {
+            await workerPage.goto(event.url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+
+            const { description, lineup, location, placeName, startDateTime } = await workerPage.evaluate(
+              () => {
+                const result = {
+                  description: '',
+                  lineup: [] as { name: string; image: string }[],
+                  location: '',
+                  placeName: '',
+                  startDateTime: '',
+                  endDateTime: '',
+                }
+
+                const aboutHeader = Array.from(document.querySelectorAll('.text-2xl')).find(
+                  (h) => h.textContent?.trim() === 'À propos'
+                )
+                if (aboutHeader) {
+                  const parent = aboutHeader.closest('section') || aboutHeader.parentElement
+                  const descDiv = parent?.querySelector('div.whitespace-pre-wrap')
+                  if (descDiv) {
+                    result.description = descDiv.textContent?.trim() || ''
+                  }
+                }
+
+                const lineupContainer = document.querySelector('div.grid.grid-cols-3')
+                if (lineupContainer) {
+                  const artistLinks = Array.from(
+                    lineupContainer.querySelectorAll('a[data-slot="tracked-link"]')
+                  )
+                  for (const a of artistLinks) {
+                    const nameDiv = a.querySelector('div.text-muted-foreground')
+                    const name = nameDiv?.textContent?.trim() || ''
+                    const img = a.querySelector('img')?.getAttribute('src') || ''
+                    if (name && img && !name.includes('abonné')) {
+                      result.lineup.push({ name, image: img })
+                    }
+                  }
+                }
+
+                const locationAnchor = Array.from(document.querySelectorAll('a.text-foreground')).find(
+                  (a): a is HTMLAnchorElement =>
+                    a instanceof HTMLAnchorElement && a.href.includes('google.com/maps/search')
+                )
+
+                if (locationAnchor) {
+                  result.location = locationAnchor.textContent?.trim() || ''
+                }
+
+                const placeNameAnchor = Array.from(
+                  document.querySelectorAll('div.flex.items-center.gap-4 a.text-foreground')
+                ).find((a) => a.textContent?.trim()?.length && a.textContent?.trim()?.length < 100)
+                if (placeNameAnchor) {
+                  result.placeName = placeNameAnchor.textContent?.trim() || ''
+                }
+
+                const dateSpan = Array.from(
+                  document.querySelectorAll('div.flex.items-center.gap-4 span')
+                ).map((span) => span.textContent?.trim() || '')
+
+                if (dateSpan.length >= 8) {
+                  const fullText = dateSpan.join(' ')
+                  const regex =
+                    /Du\s+\w+\s+(\d+)\s+(\w+)\.?\s+à\s+(\d{2}:\d{2})\s+Au\s+\w+\s+(\d+)\s+(\w+)\.?\s+à\s+(\d{2}:\d{2})/
+                  const match = fullText.match(regex)
+                  if (match) {
+                    const [, startDay, startMonth, startHour, endDay, endMonth, endHour] = match
+                    result.startDateTime = `${new Date().getFullYear()}-${startMonth}-${startDay}T${startHour}:00`
+                    result.endDateTime = `${new Date().getFullYear()}-${endMonth}-${endDay}T${endHour}:00`
+                  }
+                }
+
+                return result
               }
-            }
+            )
 
-            const lineupContainer = document.querySelector('div.grid.grid-cols-3')
-            if (lineupContainer) {
-              const artistLinks = Array.from(
-                lineupContainer.querySelectorAll('a[data-slot="tracked-link"]')
-              )
-              for (const a of artistLinks) {
-                const nameDiv = a.querySelector('div.text-muted-foreground')
-                const name = nameDiv?.textContent?.trim() || ''
-                const img = a.querySelector('img')?.getAttribute('src') || ''
-                if (name && img && !name.includes('abonné')) {
-                  result.lineup.push({ name, image: img })
+            // Correction parsing des dates avec la fonction buildISODate
+            let startDate = ''
+            let endDate = ''
+            try {
+              if (startDateTime) {
+                // On parse startDateTime avec regex
+                const regex =
+                  /Du\s+\w+\s+(\d+)\s+(\w+)\.?\s+à\s+(\d{2}:\d{2})\s+Au\s+\w+\s+(\d+)\s+(\w+)\.?\s+à\s+(\d{2}:\d{2})/
+                const match = startDateTime.match(regex)
+                if (match) {
+                  const [, startDay, startMonth, startHour, endDay, endMonth, endHour] = match
+                  startDate = this.buildISODate(startDay, startMonth, startHour)
+                  endDate = this.buildISODate(endDay, endMonth, endHour)
                 }
               }
+            } catch (err) {
+              console.warn('Erreur parsing dates:', err)
             }
 
-            const locationAnchor = Array.from(document.querySelectorAll('a.text-foreground')).find(
-              (a): a is HTMLAnchorElement =>
-                a instanceof HTMLAnchorElement && a.href.includes('google.com/maps/search')
-            )
+            // fallback si pas de date valide
+            if (!startDate) startDate = event.date
+            if (!endDate) endDate = event.date
 
-            if (locationAnchor) {
-              result.location = locationAnchor.textContent?.trim() || ''
-            }
+            const coords = location ? await this.geocodeAddress(location) : null
 
-            const placeNameAnchor = Array.from(
-              document.querySelectorAll('div.flex.items-center.gap-4 a.text-foreground')
-            ).find((a) => a.textContent?.trim()?.length && a.textContent?.trim()?.length < 100)
-            if (placeNameAnchor) {
-              result.placeName = placeNameAnchor.textContent?.trim() || ''
-            }
-
-            const dateSpan = Array.from(
-              document.querySelectorAll('div.flex.items-center.gap-4 span')
-            ).map((span) => span.textContent?.trim() || '')
-
-            if (dateSpan.length >= 8) {
-              const fullText = dateSpan.join(' ')
-              const regex =
-                /Du\s+\w+\s+(\d+)\s+(\w+)\.?\s+à\s+(\d{2}:\d{2})\s+Au\s+\w+\s+(\d+)\s+(\w+)\.?\s+à\s+(\d{2}:\d{2})/
-              const match = fullText.match(regex)
-              if (match) {
-                const [, startDay, startMonth, startHour, endDay, endMonth, endHour] = match
-                result.startDateTime = `${new Date().getFullYear()}-${startMonth}-${startDay}T${startHour}:00`
-                result.endDateTime = `${new Date().getFullYear()}-${endMonth}-${endDay}T${endHour}:00`
-              }
-            }
-
-            return result
+            const createdEvent = await this.createEventFromScrapedData({
+              title: event.title,
+              startDate,
+              endDate,
+              address: location,
+              city: 'Toulouse',
+              placeName: placeName || '',
+              latitude: coords?.lat || null,
+              longitude: coords?.lng || null,
+              bannerUrl: event.image,
+              description,
+              lineup,
+            })
+            createdEvents.push(createdEvent)
+          } catch (error) {
+            console.warn(`[Scraper] Erreur event ${event.title}:`, error)
           }
-        )
-
-        // Correction parsing des dates avec la fonction buildISODate
-        let startDate = ''
-        let endDate = ''
-        try {
-          if (startDateTime) {
-            // On parse startDateTime avec regex
-            const regex =
-              /Du\s+\w+\s+(\d+)\s+(\w+)\.?\s+à\s+(\d{2}:\d{2})\s+Au\s+\w+\s+(\d+)\s+(\w+)\.?\s+à\s+(\d{2}:\d{2})/
-            const match = startDateTime.match(regex)
-            if (match) {
-              const [, startDay, startMonth, startHour, endDay, endMonth, endHour] = match
-              startDate = this.buildISODate(startDay, startMonth, startHour)
-              endDate = this.buildISODate(endDay, endMonth, endHour)
-            }
-          }
-        } catch (err) {
-          console.warn('Erreur parsing dates:', err)
         }
-
-        // fallback si pas de date valide
-        if (!startDate) startDate = event.date
-        if (!endDate) endDate = event.date
-
-        const coords = location ? await this.geocodeAddress(location) : null
-
-        const createdEvent = await this.createEventFromScrapedData({
-          title: event.title,
-          startDate,
-          endDate,
-          address: location,
-          city: 'Toulouse',
-          placeName: placeName || '',
-          latitude: coords?.lat || null,
-          longitude: coords?.lng || null,
-          bannerUrl: event.image,
-          description,
-          lineup,
-        })
-        createdEvents.push(createdEvent)
-      } catch (error) {
-        console.warn("Erreur lors de la création d'événement:", error)
+      } finally {
+        await workerPage.close()
       }
     }
 
+    await Promise.all(Array.from({ length: CONCURRENCY }, (_, i) => worker(i + 1)))
+
     await browser.close()
+    console.log('[Scraper] Finished.')
 
     return createdEvents
   }
