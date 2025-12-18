@@ -70,6 +70,8 @@ const BookmarksController = () => import('#events/controllers/bookmarks_controll
 
 // Scraper route for testing - Admin only
 router.get('/scrap/events/toulouse', [ScrapeEventsController]).as('events.scrape')
+const ScrapeSportsEventsController = () => import('#events/controllers/scrape_sports_events_controller')
+router.get('/scrap/sports/toulouse', [ScrapeSportsEventsController]).as('events.scrape-sports')
 // .middleware([middleware.auth(), middleware.admin()])
 
 // Pages CLIENT
