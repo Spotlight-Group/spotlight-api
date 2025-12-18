@@ -70,6 +70,10 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
       MAIL_FROM: ${MAIL_FROM}
+      OLLAMA_HOST: http://host.docker.internal:11434
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
     networks:
       - spotlight_net

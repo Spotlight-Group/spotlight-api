@@ -61,8 +61,20 @@ export default await Env.create(new URL('../', import.meta.url), {
   | Variables for frontend URL (OAuth redirects)
   |----------------------------------------------------------
   */
+  /*
+  |----------------------------------------------------------
+  | Variables for frontend URL (OAuth redirects)
+  |----------------------------------------------------------
+  */
   FRONTEND_URL: Env.schema.string(),
   APP_URL: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for AI Service (Ollama)
+  |----------------------------------------------------------
+  */
+  OLLAMA_HOST: Env.schema.string.optional(),
 
   /*
   |----------------------------------------------------------

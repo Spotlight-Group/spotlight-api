@@ -3,32 +3,27 @@ import env from '#start/env'
 
 @inject()
 @inject()
+@inject()
 export class AiService {
-    private apiKey: string
+    private ollamaHost: string
 
     constructor() {
-        this.apiKey = env.get('GROQ_API_KEY') || ''
+        this.ollamaHost = env.get('OLLAMA_HOST') || 'http://localhost:11434'
     }
 
     async rewriteDescription(originalDescription: string): Promise<string> {
-        if (!this.apiKey) {
-            console.warn('GROQ_API_KEY is missing. Skipping description rewrite.')
-            return originalDescription
-        }
-
         if (!originalDescription || originalDescription.length < 10) {
             return originalDescription
         }
 
         try {
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            const response = await fetch(`${this.ollamaHost}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`,
                 },
                 body: JSON.stringify({
-                    model: 'llama-3.3-70b-versatile',
+                    model: 'llama3.2',
                     messages: [
                         {
                             role: 'system',
@@ -40,25 +35,33 @@ Règles :
 - Langue : Français.
 - Ne pas inventer d'informations. Utilise seulement le contenu fourni.
 - Si le texte est très court ou semble être juste une liste, essaie de le rendre plus fluide.
-- Pas de hashtags excessifs.`
+- Pas de hashtags excessifs.
+- Renvoie uniquement la description réécrite. Ne me fait pas de phrases d'introduction avant de me l'écrire.
+- Ne l'entoure PAS de guillemets.`
                         },
                         {
                             role: 'user',
                             content: `Réécris cette description : \n\n${originalDescription}`
                         }
                     ],
+                    stream: false,
                     temperature: 0.7,
                 }),
             })
 
             if (!response.ok) {
                 const errorText = await response.text()
-                console.warn(`Groq API error: ${response.status} - ${errorText}`)
+                console.warn(`Ollama API error: ${response.status} - ${errorText}`)
                 return originalDescription
             }
 
-            const data = await response.json()
-            const rewritten = data.choices?.[0]?.message?.content?.trim()
+            const data = (await response.json()) as { message: { content: string } }
+            let rewritten = data.message?.content?.trim()
+
+            // Remove surrounding quotes if present
+            if (rewritten && rewritten.startsWith('"') && rewritten.endsWith('"')) {
+                rewritten = rewritten.slice(1, -1)
+            }
 
             return rewritten || originalDescription
         } catch (error) {
