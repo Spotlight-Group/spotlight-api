@@ -58,7 +58,9 @@ export class UsersService {
       )
 
     return await User.create({
-      ...data,
+      full_name: data.full_name,
+      email: data.email,
+      password: data.password,
       bannerUrl,
       role: data.role || UserRoles.USER, // Set default role to USER
     })
