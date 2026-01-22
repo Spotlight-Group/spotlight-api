@@ -29,15 +29,15 @@ const OauthController = () => import('#auth/controllers/oauth_controller')
 // endregion
 
 router.group(() => {
-  router.post('login', [LoginController]).as('users.login')
-  router.post('register', [RegisterController]).as('users.register')
+  router.post('/login', [LoginController]).as('users.login')
+  router.post('/register', [RegisterController]).as('users.register')
   router
-    .get('reset-password/:token', [ResetPasswordController, 'show'])
+    .get('/reset-password/:token', [ResetPasswordController, 'show'])
     .as('users.reset-password-form')
-  router.post('reset-password', [ResetPasswordController]).as('users.reset-password')
-  router.post('forgot-password', [ForgotPasswordController]).as('users.forgot-password')
-  router.get('oauth/:provider', [OauthController, 'redirect']).as('oauth.redirect')
-  router.get('oauth/:provider/callback', [OauthController, 'callback']).as('oauth.callback')
+  router.post('/reset-password', [ResetPasswordController]).as('users.reset-password')
+  router.post('/forgot-password', [ForgotPasswordController]).as('users.forgot-password')
+  router.get('/oauth/:provider', [OauthController, 'redirect']).as('oauth.redirect')
+  router.get('/oauth/:provider/callback', [OauthController, 'callback']).as('oauth.callback')
 })
 
 // CLIENT region Controller's Imports
