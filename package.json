@@ -72,6 +72,7 @@
     "@adonisjs/mail": "^9.2.2",
     "@vinejs/vine": "^3.0.1",
     "adonis-autoswagger": "^3.65.0",
+    "better-sqlite3": "^12.5.0",
     "luxon": "^3.6.1",
     "mysql2": "^3.14.1",
     "puppeteer": "^24.11.2",
