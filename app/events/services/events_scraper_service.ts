@@ -76,7 +76,6 @@ export class EventsScraperService {
   }): Promise<Event> {
     const artistIds = await this.createOrFindArtists(eventData.lineup)
 
-    // Rewrite description using AI
     const rewrittenDescription = await this.aiService.rewriteDescription(eventData.description)
 
     const startDateTime = DateTime.fromISO(eventData.startDate)
@@ -91,7 +90,7 @@ export class EventsScraperService {
 
     return await this.eventsService.createFromUrl({
       title: eventData.title,
-      description: rewrittenDescription || null,
+      description: rewrittenDescription,
       startDate: startDateTime.toJSDate(),
       endDate: endDateTime.toJSDate(),
       startHour: startDateTime.toJSDate(),
@@ -106,89 +105,6 @@ export class EventsScraperService {
       bannerUrl: eventData.bannerUrl,
       artistIds: artistIds.length > 0 ? artistIds : undefined,
     })
-  }
-
-  private cleanAddress(address: string): string {
-    const parts = address.split(',').map((p) => p.trim())
-    if (parts.length > 1) {
-      const firstPart = parts[0]
-      const hasDigits = /\d/.test(firstPart)
-      const streetTypes = [
-        'rue',
-        'avenue',
-        'place',
-        'boulevard',
-        'allée',
-        'impasse',
-        'quai',
-        'chemin',
-        'route',
-      ]
-      const startsWithStreetType = streetTypes.some((t) => firstPart.toLowerCase().startsWith(t))
-
-      if (!hasDigits && !startsWithStreetType) {
-        return parts.slice(1).join(', ')
-      }
-    }
-    return address
-  }
-
-  private async geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
-    // Basic Rate Limiting
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    try {
-      let query = address
-      let response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`,
-        {
-          headers: {
-            'User-Agent': 'SpotlightApp/1.0 (contact@spotlight.app)',
-          },
-        }
-      )
-
-      if (!response.ok) {
-        console.warn(`Geocoding failed for ${query}: ${response.status} ${response.statusText}`)
-        return null
-      }
-
-      let data = (await response.json()) as { lat: string; lon: string }[]
-
-      // Retry with cleaned address if no results
-      if (!data || data.length === 0) {
-        const cleaned = this.cleanAddress(address)
-        if (cleaned !== address) {
-          // Rate limit for retry too
-          await new Promise((resolve) => setTimeout(resolve, 1000))
-
-          response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleaned)}`,
-            {
-              headers: {
-                'User-Agent': 'SpotlightApp/1.0 (contact@spotlight.app)',
-              },
-            }
-          )
-
-          if (response.ok) {
-            data = (await response.json()) as { lat: string; lon: string }[]
-          }
-        }
-      }
-
-      if (data && data.length > 0) {
-        return {
-          lat: Number.parseFloat(data[0].lat),
-          lng: Number.parseFloat(data[0].lon),
-        }
-      }
-
-      return null
-    } catch (error) {
-      console.warn('Erreur lors du géocodage :', error)
-      return null
-    }
   }
 
   async fetchShotgunEvents(): Promise<Event[]> {
@@ -295,7 +211,7 @@ export class EventsScraperService {
           try {
             await workerPage.goto(event.url, { waitUntil: 'domcontentloaded', timeout: 30000 })
 
-            const { description, lineup, location, placeName, startDateTime } = await workerPage.evaluate(
+            const { description, lineup, location, placeName, startDateTime, latitude, longitude } = await workerPage.evaluate(
               () => {
                 const result = {
                   description: '',
@@ -304,6 +220,8 @@ export class EventsScraperService {
                   placeName: '',
                   startDateTime: '',
                   endDateTime: '',
+                  latitude: null as number | null,
+                  longitude: null as number | null,
                 }
 
                 const aboutHeader = Array.from(document.querySelectorAll('.text-2xl')).find(
@@ -339,6 +257,15 @@ export class EventsScraperService {
 
                 if (locationAnchor) {
                   result.location = locationAnchor.textContent?.trim() || ''
+                  
+                  // Extraire lat/lng depuis le lien Google Maps
+                  // Format: https://www.google.com/maps/search/.../@43.5480492,1.4854047,17z
+                  const href = locationAnchor.href
+                  const coordsMatch = href.match(/@([-\d.]+),([-\d.]+),\d+z/)
+                  if (coordsMatch) {
+                    result.latitude = parseFloat(coordsMatch[1])
+                    result.longitude = parseFloat(coordsMatch[2])
+                  }
                 }
 
                 const placeNameAnchor = Array.from(
@@ -391,7 +318,13 @@ export class EventsScraperService {
             if (!startDate) startDate = event.date
             if (!endDate) endDate = event.date
 
-            const coords = location ? await this.geocodeAddress(location) : null
+            // Skip les événements en pré-inscription (placeName = "App Store")
+            if (placeName === 'App Store') {
+              console.log(`[Scraper] Skip événement en pré-inscription: ${event.title}`)
+              continue
+            }
+
+            console.log(`[Scraper] Coordonnées extraites: lat=${latitude}, lng=${longitude}`)
 
             const createdEvent = await this.createEventFromScrapedData({
               title: event.title,
@@ -400,8 +333,8 @@ export class EventsScraperService {
               address: location,
               city: 'Toulouse',
               placeName: placeName || '',
-              latitude: coords?.lat || null,
-              longitude: coords?.lng || null,
+              latitude: latitude,
+              longitude: longitude,
               bannerUrl: event.image,
               description,
               lineup,
